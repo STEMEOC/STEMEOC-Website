@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  createdAt    DateTime   @default(now())
+  newsPosts    NewsPost[]
+}
+
+model NewsPost {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  title         String
+  excerpt       String
+  body          String
+  coverImageUrl String?
+  category      String    @default("News")
+  published     Boolean   @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  authorId      String
+  author        Admin     @relation(fields: [authorId], references: [id])
+
+  @@index([published, publishedAt])
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  bio       String
+  photoUrl  String?
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, order])
+}
+
+model Program {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  description   String
+  coverImageUrl String?
+  category      String
+  order         Int      @default(0)
+  published     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([published, order])
+}
+
+model Partner {
+  id         String   @id @default(cuid())
+  name       String
+  logoUrl    String
+  websiteUrl String?
+  order      Int      @default(0)
+  published  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([published, order])
+}
+
+model PodcastEpisode {
+  id          String   @id @default(cuid())
+  title       String
+  videoId     String
+  description String
+  tag         String?
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, order])
+}
+
+model SiteStat {
+  id        String   @id @default(cuid())
+  label     String
+  value     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+enum FormFieldType {
+  SHORT_TEXT
+  PARAGRAPH
+  EMAIL
+  NUMBER
+  DATE
+  DROPDOWN
+  MULTIPLE_CHOICE
+  CHECKBOXES
+  FILE
+}
+
+enum FormLayout {
+  CLASSIC
+  MINIMAL
+  BOLD
+  COVER
+  SIDEBAR
+  DUOTONE
+  FRAMED
+  BADGE
+}
+
+enum FormTheme {
+  LIGHT
+  DARK
+}
+
+model Form {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  title       String
+  description String?
+  published   Boolean           @default(true)
+  accentColor String            @default("#2c80c2")
+  layout      FormLayout        @default(CLASSIC)
+  coverImageUrl String?
+  theme       FormTheme         @default(LIGHT)
+  fields      FormField[]
+  submissions FormSubmission[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model FormField {
+  id       String        @id @default(cuid())
+  formId   String
+  form     Form          @relation(fields: [formId], references: [id], onDelete: Cascade)
+  label    String
+  type     FormFieldType
+  options  String[]      @default([])
+  required Boolean       @default(false)
+  order    Int           @default(0)
+
+  @@index([formId, order])
+}
+
+model FormSubmission {
+  id        String   @id @default(cuid())
+  formId    String
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  data      Json
+  createdAt DateTime @default(now())
+
+  @@index([formId, createdAt])
+}

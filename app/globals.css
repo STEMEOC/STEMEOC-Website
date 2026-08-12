@@ -1,0 +1,130 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Playful STEM-for-kids direction: bright white, bold friendly type, big
+   flat solid-color shapes (never gradients). The four brand colors come
+   straight from the logo and are used generously and confidently: full
+   circles, chunky blocks, filled buttons. */
+@theme {
+  --color-ink: #17182b;
+  --color-ink-soft: #2a2c47;
+  --color-paper: #f5f7fa;
+  --color-paper-dim: #f5f6fa;
+  --color-blue: #2c80c2;
+  --color-blue-deep: #1f5d91;
+  --color-red: #e5262a;
+  --color-green: #14a650;
+  --color-orange: #f49423;
+}
+
+/* Fonts come from next/font, which injects real values via a CSS variable
+   on <html>. @theme inline forwards that runtime value into Tailwind's
+   utility generation instead of baking in a static one. */
+@theme inline {
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+  --font-khmer: var(--font-khmer);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body), var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display), var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-mono-label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+
+.font-khmer {
+  font-family: var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Soft polka-dot texture for playful section backdrops */
+.dot-field {
+  background-image: radial-gradient(currentColor 2px, transparent 2px);
+  background-size: 26px 26px;
+}
+
+/* Chunky "sticker" offset shadows for the flat, toy-block admin UI —
+   deliberately hard-edged (no blur) so filled color shapes read as
+   physical blocks rather than soft SaaS cards. */
+.shadow-pop {
+  box-shadow: 7px 7px 0 0 var(--color-ink);
+}
+
+.shadow-pop-sm {
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+}
+
+.shadow-pop-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shadow-pop-hover:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 10px 10px 0 0 var(--color-ink);
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 40s linear infinite;
+}
+
+@keyframes float-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(70px, -60px) scale(1.12); }
+  66% { transform: translate(-40px, 40px) scale(0.95); }
+}
+
+@keyframes float-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-80px, 50px) scale(0.9); }
+  66% { transform: translate(50px, -35px) scale(1.1); }
+}
+
+@keyframes float-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(60px, 55px) scale(1.08); }
+  66% { transform: translate(-55px, -30px) scale(0.92); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.animate-float-a {
+  animation: float-a 26s ease-in-out infinite, pulse-soft 10s ease-in-out infinite;
+}
+
+.animate-float-b {
+  animation: float-b 30s ease-in-out infinite, pulse-soft 11s ease-in-out infinite 0.5s;
+}
+
+.animate-float-c {
+  animation: float-c 24s ease-in-out infinite, pulse-soft 9s ease-in-out infinite 1s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
