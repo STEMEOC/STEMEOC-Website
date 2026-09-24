@@ -124,3 +124,26 @@ export function getNewsPostBySlug(slug: string) {
     ["news"]
   );
 }
+
+/** URL segment for a team member's profile, e.g. "Te Henglay" -> "te-henglay". */
+export function teamMemberSlug(member: { id: string; name: string }) {
+  const slug = member.name
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  // Names with no Latin letters (e.g. written in Khmer) fall back to the id.
+  return slug || member.id;
+}
+
+/**
+ * Finds a published team member by profile slug, reusing the cached team list
+ * (the model has no slug column). Also returns their position, which drives
+ * their accent color, and the full list for "more of the team".
+ */
+export async function getTeamMemberBySlug(slug: string) {
+  const team = await getTeamMembers();
+  const index = team.findIndex((m) => teamMemberSlug(m) === slug || m.id === slug);
+  return index === -1 ? null : { member: team[index], index, team };
+}

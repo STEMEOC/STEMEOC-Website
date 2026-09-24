@@ -5,6 +5,7 @@ import { Atom, Confetti, Robot, Leaf, Trophy, UsersThree } from "@phosphor-icons
 import { getPrograms } from "@/lib/content";
 import { Reveal } from "@/components/motion/Reveal";
 import { getDictionary } from "@/lib/i18n";
+import { PageTransition } from "@/components/motion/PageTransition";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { dict } = await getDictionary();
@@ -26,7 +27,7 @@ export default async function ProjectsPage() {
   const PROGRAM_LABELS = dict.projects.categories;
 
   return (
-    <>
+    <PageTransition>
       <section className="relative overflow-hidden bg-[#0b1f3d]">
         <div className="pointer-events-none absolute -right-1/4 top-[-45%] h-[140%] w-[150%] rotate-[-6deg] rounded-[45%] bg-[#123162]" />
         <div className="pointer-events-none absolute -right-1/3 top-[-55%] h-[140%] w-[160%] rotate-[-4deg] rounded-[45%] bg-[#0e2750]" />
@@ -105,6 +106,6 @@ export default async function ProjectsPage() {
           </div>
         </div>
       </section>
-    </>
+    </PageTransition>
   );
 }

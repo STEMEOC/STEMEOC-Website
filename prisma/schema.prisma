@@ -33,6 +33,7 @@ model NewsPost {
   author        Admin     @relation(fields: [authorId], references: [id])
 
   @@index([published, publishedAt])
+  @@index([authorId])
 }
 
 model TeamMember {
@@ -151,6 +152,8 @@ model Form {
   submissions FormSubmission[]
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
+
+  @@index([published, createdAt])
 }
 
 model FormField {

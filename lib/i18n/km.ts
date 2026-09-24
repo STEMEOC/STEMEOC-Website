@@ -214,4 +214,10 @@ export const km: Dictionary = {
       community: "សហគមន៍",
     },
   },
+  team: {
+    backToTeam: "ត្រឡប់ទៅក្រុមការងារ",
+    about: "អំពី",
+    moreEyebrow: "ក្រុមការងាររបស់យើង",
+    moreTitle: "ស្គាល់សមាជិកក្រុមផ្សេងទៀត។",
+  },
 };

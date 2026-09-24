@@ -213,6 +213,12 @@ export const en = {
       community: "Community",
     },
   },
+  team: {
+    backToTeam: "Back to the team",
+    about: "About",
+    moreEyebrow: "Our team",
+    moreTitle: "Meet more of the team.",
+  },
 } as const;
 
 type Widen<T> = T extends string

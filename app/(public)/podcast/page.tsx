@@ -3,6 +3,7 @@ import { getPodcastEpisodes } from "@/lib/content";
 import { Reveal } from "@/components/motion/Reveal";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { getDictionary } from "@/lib/i18n";
+import { PageTransition } from "@/components/motion/PageTransition";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { dict } = await getDictionary();
@@ -15,7 +16,7 @@ export default async function PodcastPage() {
   const [episodes, { dict }] = await Promise.all([getPodcastEpisodes(), getDictionary()]);
 
   return (
-    <>
+    <PageTransition>
       {/* Hero: dark navy backdrop matching the rest of the site */}
       <section className="relative overflow-hidden bg-[#0b1f3d]">
         <div className="pointer-events-none absolute -right-1/4 top-[-45%] h-[140%] w-[150%] rotate-[-6deg] rounded-[45%] bg-[#123162]" />
@@ -93,6 +94,6 @@ export default async function PodcastPage() {
           </div>
         </div>
       </section>
-    </>
+    </PageTransition>
   );
 }

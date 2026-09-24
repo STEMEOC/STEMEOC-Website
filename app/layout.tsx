@@ -42,6 +42,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang={locale}
+      suppressHydrationWarning
       className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} ${khmerFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-paper text-ink">

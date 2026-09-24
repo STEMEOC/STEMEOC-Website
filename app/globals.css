@@ -128,3 +128,68 @@ h1, h2, h3, h4 {
     scroll-behavior: auto !important;
   }
 }
+
+/* Opening curtain already played this session (set by the public layout's inline script). */
+html[data-intro-seen] .intro-curtain {
+  display: none;
+}
+
+
+/* Page transitions (see components/motion/PageTransition.tsx). The old page leaves fast
+   so it never competes with the new one; the new page waits for it, then
+   rises in softly. Uses the native View Transitions API — browsers without
+   it simply swap pages instantly. */
+:root {
+  --page-exit: 160ms;
+  --page-enter: 420ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(.page-exit) {
+  animation: var(--page-exit) cubic-bezier(0.4, 0, 1, 1) both page-out;
+}
+
+::view-transition-new(.page-enter) {
+  animation: var(--page-enter) var(--ease-out-expo) calc(var(--page-exit) * 0.6) both page-in;
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+}
+
+/* Keep the header still while the content beneath it changes. */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* Don't swallow clicks while a transition is running. */
+::view-transition {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}

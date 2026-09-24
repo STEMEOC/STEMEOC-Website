@@ -20,7 +20,7 @@ export async function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-paper">
+    <header className="sticky top-0 z-40 bg-paper" style={{ viewTransitionName: "site-header" }}>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="flex items-center">
           <Image

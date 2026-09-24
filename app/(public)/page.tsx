@@ -6,6 +6,8 @@ import { Reveal } from "@/components/motion/Reveal";
 import { GrowIn } from "@/components/motion/GrowIn";
 import { ProgramsCarousel } from "@/components/ProgramsCarousel";
 import { getDictionary } from "@/lib/i18n";
+import { PageTransition } from "@/components/motion/PageTransition";
+import { TeamCard } from "@/components/TeamCard";
 
 const NEWS_CATEGORY_COLORS: Record<string, string> = {
   Competition: "var(--color-orange)",
@@ -63,7 +65,7 @@ export default async function HomePage() {
   }));
 
   return (
-    <>
+    <PageTransition>
       {/* Hero: dark navy backdrop with soft wave bands, circular photo */}
       <section className="relative overflow-hidden bg-[#0b1f3d]">
         <div className="pointer-events-none absolute -right-1/4 top-[-45%] h-[140%] w-[150%] rotate-[-6deg] rounded-[45%] bg-[#123162]" />
@@ -346,26 +348,7 @@ export default async function HomePage() {
                 const color = ACCENT_COLORS[i % ACCENT_COLORS.length];
                 return (
                   <Reveal key={member.id} delay={i * 0.04} className="h-full">
-                    <div className="group relative flex h-full aspect-[4/5] w-full items-end justify-center overflow-hidden rounded-2xl shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg">
-                      {member.photoUrl && (
-                        <Image
-                          src={member.photoUrl}
-                          alt={member.name}
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-110"
-                          sizes="(max-width: 768px) 50vw, 220px"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                      <div className="relative p-4 text-center">
-                        <h3 className="font-display text-sm font-semibold leading-tight text-paper">
-                          {member.name}
-                        </h3>
-                        <p className="mt-1 text-xs font-semibold" style={{ color }}>
-                          {member.role}
-                        </p>
-                      </div>
-                    </div>
+                    <TeamCard member={member} color={color} />
                   </Reveal>
                 );
               })}
@@ -458,6 +441,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-    </>
+    </PageTransition>
   );
 }
