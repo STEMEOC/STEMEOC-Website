@@ -4,9 +4,9 @@ import { FacebookLogo, LinkedinLogo, YoutubeLogo } from "@phosphor-icons/react/d
 import { getDictionary } from "@/lib/i18n";
 
 const SOCIAL_LINKS = [
-  { label: "Facebook", href: "https://facebook.com", icon: FacebookLogo },
-  { label: "YouTube", href: "https://youtube.com", icon: YoutubeLogo },
-  { label: "Linkedin", href: "https://linkedin.com", icon: LinkedinLogo },
+  { label: "Facebook", href: "https://www.facebook.com/STEMCambodia", icon: FacebookLogo },
+  { label: "YouTube", href: "https://www.youtube.com/@StemCambodia", icon: YoutubeLogo },
+  { label: "Linkedin", href: "https://www.linkedin.com/company/stemcambodia", icon: LinkedinLogo },
 ];
 
 const heading = "font-body text-lg font-bold uppercase";
