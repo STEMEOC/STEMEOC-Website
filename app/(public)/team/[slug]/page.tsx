@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTeamMemberBySlug } from "@/lib/content";
+import { getTeamMemberBySlug, teamMemberSlug } from "@/lib/content";
+import { EASTER_EGGS } from "@/lib/easter-egg";
 import { getDictionary } from "@/lib/i18n";
 import { Reveal } from "@/components/motion/Reveal";
 import { TeamCard } from "@/components/TeamCard";
@@ -53,6 +54,7 @@ export default async function TeamMemberPage({ params }: PageProps<"/team/[slug]
           aboutLabel={dict.team.aboutMe}
           backLabel={dict.team.backToTeam}
           backHref="/about#team"
+          easterEgg={EASTER_EGGS[teamMemberSlug(member)]}
         />
       </section>
 

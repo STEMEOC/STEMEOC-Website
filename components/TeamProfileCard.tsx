@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
+  AnimatePresence,
   motion,
   useMotionTemplate,
   useMotionValue,
@@ -13,6 +14,8 @@ import {
   type Variants,
 } from "motion/react";
 import { ArrowUpLeft } from "@phosphor-icons/react";
+import { EasterEggPlayer } from "@/components/EasterEggPlayer";
+import type { EasterEgg } from "@/lib/easter-egg";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const BRAND = ["var(--color-green)", "var(--color-orange)", "var(--color-red)", "var(--color-blue)"];
@@ -33,6 +36,62 @@ const word: Variants = {
   show: { y: "0%", transition: { duration: 0.8, ease: EASE } },
 };
 
+/** Timed lyrics for the easter-egg song; the current line lights up and stays centered. */
+function Lyrics({ egg, time, playing }: { egg: EasterEgg; time: number; playing: boolean }) {
+  const box = useRef<HTMLDivElement>(null);
+  let current = -1;
+  egg.lyrics.forEach((line, i) => {
+    if (line.t <= time) current = i;
+  });
+
+  useEffect(() => {
+    const el = box.current;
+    const line = el?.children[Math.max(current, 0)] as HTMLElement | undefined;
+    if (!el || !line) return;
+    el.scrollTo({ top: line.offsetTop - el.clientHeight / 2 + line.clientHeight / 2, behavior: "smooth" });
+  }, [current]);
+
+  if (egg.lyrics.length === 0) {
+    return (
+      <div className="flex items-center gap-4">
+        <div aria-hidden className="flex h-10 items-end gap-1">
+          {BRAND.map((c, i) => (
+            <motion.span
+              key={c}
+              className="w-1.5 rounded-full"
+              style={{ backgroundColor: c }}
+              animate={playing ? { height: ["30%", "100%", "45%", "85%", "30%"] } : { height: "30%" }}
+              transition={playing ? { duration: 1.1, repeat: Infinity, delay: i * 0.15, ease: "easeInOut" } : { duration: 0.3 }}
+            />
+          ))}
+        </div>
+        <div>
+          <p className="font-display text-2xl font-bold lg:text-3xl">{egg.title}</p>
+          <p className="text-white/70">{egg.artist}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={box}
+      className="relative h-72 overflow-hidden [mask-image:linear-gradient(transparent,black_20%,black_80%,transparent)] lg:h-80"
+    >
+      {egg.lyrics.map((line, i) => (
+        <p
+          key={i}
+          className={`py-1.5 text-xl font-bold leading-snug transition-[color,opacity,transform] duration-500 lg:text-2xl ${
+            i === current ? "text-white" : i < current ? "text-white/30" : "text-white/45"
+          } ${i === current ? "translate-x-1" : ""}`}
+        >
+          {line.text}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 /**
  * Team profile card (Figma "Team01", expanded). On load the portrait wipes up
  * and settles from a slight zoom while the text staggers in. With a mouse the
@@ -45,13 +104,19 @@ export function TeamProfileCard({
   aboutLabel,
   backLabel,
   backHref,
+  easterEgg,
 }: {
   member: { name: string; role: string; photoUrl: string | null; bio: string[] };
   aboutLabel: string;
   backLabel: string;
   backHref: string;
+  /** A hidden song: the corner button becomes a player and the bio becomes lyrics. */
+  easterEgg?: EasterEgg;
 }) {
   const reduce = useReducedMotion();
+  const [eggOpen, setEggOpen] = useState(false);
+  const [eggTime, setEggTime] = useState(0);
+  const [eggPlaying, setEggPlaying] = useState(false);
   const photo = useRef<HTMLDivElement>(null);
 
   // Pointer position over the portrait, -0.5..0.5 on each axis.
@@ -136,7 +201,7 @@ export function TeamProfileCard({
         variants={textGroup}
         initial="hidden"
         animate="show"
-        className="flex flex-col justify-center pb-16 md:py-10 md:pr-8"
+        className={`flex flex-col justify-center md:py-10 md:pr-8 ${eggOpen ? "pb-28" : "pb-16"}`}
       >
         <h1 className="font-body text-3xl font-bold leading-tight md:text-4xl lg:text-5xl">
           {member.name.split(" ").map((w, i) => (
@@ -165,20 +230,44 @@ export function TeamProfileCard({
           ))}
         </motion.div>
 
-        {member.bio.length > 0 && (
-          <div className="mt-8 max-w-3xl">
-            <motion.h2 variants={textItem} className="font-body text-sm font-semibold uppercase tracking-[0.2em] text-white/60">
-              {aboutLabel}
-            </motion.h2>
-            <div className="mt-4 space-y-4 text-base font-light leading-relaxed text-white/90 lg:text-lg">
-              {member.bio.map((p, i) => (
-                <motion.p key={i} variants={textItem}>
-                  {p}
-                </motion.p>
-              ))}
-            </div>
-          </div>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          {easterEgg && eggOpen ? (
+            <motion.div
+              key="lyrics"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.4, ease: EASE }}
+              className="mt-8 max-w-3xl"
+            >
+              <h2 className="font-body text-sm font-semibold uppercase tracking-[0.2em] text-white/60">Now playing</h2>
+              <div className="mt-4">
+                <Lyrics egg={easterEgg} time={eggTime} playing={eggPlaying} />
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="bio"
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.3, ease: EASE }}
+            >
+              {member.bio.length > 0 && (
+                <div className="mt-8 max-w-3xl">
+                  <motion.h2 variants={textItem} className="font-body text-sm font-semibold uppercase tracking-[0.2em] text-white/60">
+                    {aboutLabel}
+                  </motion.h2>
+                  <div className="mt-4 space-y-4 text-base font-light leading-relaxed text-white/90 lg:text-lg">
+                    {member.bio.map((p, i) => (
+                      <motion.p key={i} variants={textItem}>
+                        {p}
+                      </motion.p>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Back to the team */}
@@ -188,19 +277,31 @@ export function TeamProfileCard({
         transition={{ type: "spring", stiffness: 260, damping: 18, delay: 0.9 }}
         className="absolute bottom-5 right-5 md:bottom-8 md:right-8"
       >
-        <Link
-          href={backHref}
-          aria-label={backLabel}
-          title={backLabel}
-          className="group relative flex size-11 items-center justify-center rounded-full bg-white text-navy md:size-14"
-        >
-          <span className="absolute inset-0 rounded-full bg-white transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-150 group-hover:opacity-0" />
-          <ArrowUpLeft
-            size={24}
-            weight="bold"
-            className="relative transition-transform duration-300 group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-hover:-rotate-12"
+        {easterEgg ? (
+          <EasterEggPlayer
+            egg={easterEgg}
+            open={eggOpen}
+            onOpenChange={setEggOpen}
+            onTime={setEggTime}
+            onPlayingChange={setEggPlaying}
+            backHref={backHref}
+            backLabel={backLabel}
           />
-        </Link>
+        ) : (
+          <Link
+            href={backHref}
+            aria-label={backLabel}
+            title={backLabel}
+            className="group relative flex size-11 items-center justify-center rounded-full bg-white text-navy md:size-14"
+          >
+            <span className="absolute inset-0 rounded-full bg-white transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-150 group-hover:opacity-0" />
+            <ArrowUpLeft
+              size={24}
+              weight="bold"
+              className="relative transition-transform duration-300 group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-hover:-rotate-12"
+            />
+          </Link>
+        )}
       </motion.div>
     </motion.article>
   );
