@@ -18,8 +18,9 @@ const nextConfig: NextConfig = {
     ],
     // AVIF is ~20% smaller than WebP; browsers without AVIF get WebP.
     formats: ["image/avif", "image/webp"],
-    // 75 is the default; 90 is for large portraits where faces go soft at 75.
-    qualities: [75, 90],
+    // Only 90 is allowed, so every <Image> is served at 90 (Next rounds other
+    // values to the closest allowed one). At the default 75 photos looked soft.
+    qualities: [90],
     // Optimized images are keyed by URL and uploads are never edited in
     // place, so cache them for 30 days instead of the 4-hour default.
     minimumCacheTTL: 60 * 60 * 24 * 30,
