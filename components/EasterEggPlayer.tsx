@@ -174,10 +174,11 @@ export function EasterEggPlayer({
           className="group relative flex size-11 items-center justify-center bg-white text-navy md:size-14"
         >
           <span className="absolute inset-0 rounded-full bg-white transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-150 group-hover:opacity-0" />
+          {/* A slow spin on hover, like a record, hints there's more than a back link here. */}
           <ArrowUpLeft
             size={24}
             weight="bold"
-            className="relative transition-transform duration-300 group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-hover:-rotate-12"
+            className="relative group-hover:animate-[spin-slow_3s_linear_infinite] motion-reduce:group-hover:animate-none"
           />
         </motion.button>
       ) : (
