@@ -214,7 +214,7 @@ function Edition({ entry, color, labels }: { entry: HallEntry; color: string; la
 }
 
 const chip =
-  "press relative rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap";
+  "press relative shrink-0 snap-start rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap";
 
 /** A row of filter chips; the navy fill slides to the chosen one. */
 function Chips<T extends string>({
@@ -234,8 +234,11 @@ function Chips<T extends string>({
 }) {
   const all: [T | null, string][] = [[null, allLabel], ...options];
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="mr-1 text-xs font-bold uppercase tracking-[0.18em] text-navy/50">{label}</span>
+    // On phones the label sits above one swipeable row that bleeds to the
+    // screen edges, so long program names never wrap or get clipped.
+    <div className="min-w-0 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
+      <span className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-navy/50 sm:mb-0 sm:mr-1">{label}</span>
+      <div className="-mx-(--gutter) flex snap-x scroll-px-(--gutter) gap-2 overflow-x-auto px-(--gutter) py-1 [scrollbar-width:none] sm:contents [&::-webkit-scrollbar]:hidden">
       {all.map(([v, text]) => {
         const on = value === v;
         return (
@@ -257,6 +260,7 @@ function Chips<T extends string>({
           </button>
         );
       })}
+      </div>
     </div>
   );
 }
