@@ -1,29 +1,27 @@
 /**
  * Hidden songs on team profiles, keyed by profile slug. On that profile the
  * corner "back" button morphs into a small player and "About me" turns into
- * lyrics that follow the song.
+ * the song's lyrics.
  */
-export type LyricLine = {
-  /** Second in the song where the line starts. */
-  t: number;
-  text: string;
-};
-
 export type EasterEgg = {
-  videoId: string;
+  /** Path under /public. */
+  audioSrc: string;
   title: string;
   artist: string;
-  /** In order of `t`. Leave empty to show a "now playing" card instead. */
-  lyrics: LyricLine[];
+  /** From the song's Genius embed code (data-song-id). */
+  geniusSongId: number;
+  geniusUrl: string;
+  /** A second photo, revealed in a circle around the cursor when hovering the portrait. */
+  revealPhoto?: string;
 };
 
 export const EASTER_EGGS: Record<string, EasterEgg> = {
   "te-henglay": {
-    videoId: "UMtEAAZhgrM",
+    audioSrc: "/audio/let-me-go.mp3",
     title: "Let Me Go",
     artist: "Daniel Caesar",
-    // One entry per line, e.g. { t: 14.2, text: "First line of the song" }.
-    // Play the song and note the second each line starts (the player shows the time).
-    lyrics: [],
+    geniusSongId: 8802324,
+    geniusUrl: "https://genius.com/Daniel-caesar-let-me-go-lyrics",
+    revealPhoto: "/uploads/team/te-henglay-reveal.jpg",
   },
 };

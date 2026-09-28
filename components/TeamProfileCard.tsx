@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useRef, useState, type PointerEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -15,7 +15,9 @@ import {
 } from "motion/react";
 import { ArrowUpLeft } from "@phosphor-icons/react";
 import { EasterEggPlayer } from "@/components/EasterEggPlayer";
+import { GeniusLyrics } from "@/components/GeniusLyrics";
 import type { EasterEgg } from "@/lib/easter-egg";
+import type { LyricsLine } from "@/lib/genius";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const BRAND = ["var(--color-green)", "var(--color-orange)", "var(--color-red)", "var(--color-blue)"];
@@ -36,62 +38,6 @@ const word: Variants = {
   show: { y: "0%", transition: { duration: 0.8, ease: EASE } },
 };
 
-/** Timed lyrics for the easter-egg song; the current line lights up and stays centered. */
-function Lyrics({ egg, time, playing }: { egg: EasterEgg; time: number; playing: boolean }) {
-  const box = useRef<HTMLDivElement>(null);
-  let current = -1;
-  egg.lyrics.forEach((line, i) => {
-    if (line.t <= time) current = i;
-  });
-
-  useEffect(() => {
-    const el = box.current;
-    const line = el?.children[Math.max(current, 0)] as HTMLElement | undefined;
-    if (!el || !line) return;
-    el.scrollTo({ top: line.offsetTop - el.clientHeight / 2 + line.clientHeight / 2, behavior: "smooth" });
-  }, [current]);
-
-  if (egg.lyrics.length === 0) {
-    return (
-      <div className="flex items-center gap-4">
-        <div aria-hidden className="flex h-10 items-end gap-1">
-          {BRAND.map((c, i) => (
-            <motion.span
-              key={c}
-              className="w-1.5 rounded-full"
-              style={{ backgroundColor: c }}
-              animate={playing ? { height: ["30%", "100%", "45%", "85%", "30%"] } : { height: "30%" }}
-              transition={playing ? { duration: 1.1, repeat: Infinity, delay: i * 0.15, ease: "easeInOut" } : { duration: 0.3 }}
-            />
-          ))}
-        </div>
-        <div>
-          <p className="font-display text-2xl font-bold lg:text-3xl">{egg.title}</p>
-          <p className="text-white/70">{egg.artist}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      ref={box}
-      className="relative h-72 overflow-hidden [mask-image:linear-gradient(transparent,black_20%,black_80%,transparent)] lg:h-80"
-    >
-      {egg.lyrics.map((line, i) => (
-        <p
-          key={i}
-          className={`py-1.5 text-xl font-bold leading-snug transition-[color,opacity,transform] duration-500 lg:text-2xl ${
-            i === current ? "text-white" : i < current ? "text-white/30" : "text-white/45"
-          } ${i === current ? "translate-x-1" : ""}`}
-        >
-          {line.text}
-        </p>
-      ))}
-    </div>
-  );
-}
-
 /**
  * Team profile card (Figma "Team01", expanded). On load the portrait wipes up
  * and settles from a slight zoom while the text staggers in. With a mouse the
@@ -105,6 +51,7 @@ export function TeamProfileCard({
   backLabel,
   backHref,
   easterEgg,
+  easterEggLyrics = null,
 }: {
   member: { name: string; role: string; photoUrl: string | null; bio: string[] };
   aboutLabel: string;
@@ -112,10 +59,12 @@ export function TeamProfileCard({
   backHref: string;
   /** A hidden song: the corner button becomes a player and the bio becomes lyrics. */
   easterEgg?: EasterEgg;
+  /** The song's lyrics, or null to link to them on Genius instead. */
+  easterEggLyrics?: LyricsLine[] | null;
 }) {
   const reduce = useReducedMotion();
   const [eggOpen, setEggOpen] = useState(false);
-  const [eggTime, setEggTime] = useState(0);
+  const [eggProgress, setEggProgress] = useState(0);
   const [eggPlaying, setEggPlaying] = useState(false);
   const photo = useRef<HTMLDivElement>(null);
 
@@ -129,6 +78,11 @@ export function TeamProfileCard({
   const glareY = useTransform(py, [-0.5, 0.5], ["0%", "100%"]);
   const glare = useMotionTemplate`radial-gradient(circle at ${glareX} ${glareY}, rgb(255 255 255 / 0.28), transparent 55%)`;
   const glareOpacity = useSpring(0, spring);
+  // Hidden photo: a soft-edged circle around the cursor, grown in on hover.
+  const revealRadius = useSpring(0, { stiffness: 180, damping: 22 });
+  const revealEdge = useTransform(revealRadius, (r) => r * 1.4);
+  const revealMask = useMotionTemplate`radial-gradient(circle at ${glareX} ${glareY}, black ${revealRadius}px, transparent ${revealEdge}px)`;
+  const revealPhoto = easterEgg?.revealPhoto;
 
   function onPointerMove(e: PointerEvent<HTMLDivElement>) {
     if (reduce || e.pointerType !== "mouse" || !photo.current) return;
@@ -136,12 +90,14 @@ export function TeamProfileCard({
     px.set((e.clientX - rect.left) / rect.width - 0.5);
     py.set((e.clientY - rect.top) / rect.height - 0.5);
     glareOpacity.set(1);
+    revealRadius.set(rect.width * 0.28);
   }
 
   function onPointerLeave() {
     px.set(0);
     py.set(0);
     glareOpacity.set(0);
+    revealRadius.set(0);
   }
 
   return (
@@ -188,6 +144,15 @@ export function TeamProfileCard({
               />
             </motion.div>
           )}
+          {revealPhoto && (
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute inset-0"
+              style={{ maskImage: revealMask, WebkitMaskImage: revealMask }}
+            >
+              <Image src={revealPhoto} alt="" fill quality={90} sizes="(max-width: 768px) 520px, 600px" className="object-cover" />
+            </motion.div>
+          )}
           <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-0 mix-blend-soft-light"
@@ -201,7 +166,7 @@ export function TeamProfileCard({
         variants={textGroup}
         initial="hidden"
         animate="show"
-        className={`flex flex-col justify-center md:py-10 md:pr-8 ${eggOpen ? "pb-28" : "pb-16"}`}
+        className={`flex flex-col justify-center md:pr-8 ${eggOpen ? "pb-40 md:pb-36 md:pt-10" : "pb-16 md:py-10"}`}
       >
         <h1 className="font-body text-3xl font-bold leading-tight md:text-4xl lg:text-5xl">
           {member.name.split(" ").map((w, i) => (
@@ -240,9 +205,28 @@ export function TeamProfileCard({
               transition={{ duration: 0.4, ease: EASE }}
               className="mt-8 max-w-3xl"
             >
-              <h2 className="font-body text-sm font-semibold uppercase tracking-[0.2em] text-white/60">Now playing</h2>
+              <h2 className="flex items-center gap-3 font-body text-sm font-semibold uppercase tracking-[0.2em] text-white/60">
+                <span aria-hidden className="flex h-3.5 items-end gap-0.5">
+                  {BRAND.map((c, i) => (
+                    <motion.span
+                      key={c}
+                      className="w-1 rounded-full"
+                      style={{ backgroundColor: c }}
+                      animate={eggPlaying ? { height: ["30%", "100%", "45%", "85%", "30%"] } : { height: "30%" }}
+                      transition={eggPlaying ? { duration: 1.1, repeat: Infinity, delay: i * 0.15, ease: "easeInOut" } : { duration: 0.3 }}
+                    />
+                  ))}
+                </span>
+                Now playing
+              </h2>
               <div className="mt-4">
-                <Lyrics egg={easterEgg} time={eggTime} playing={eggPlaying} />
+                <GeniusLyrics
+                  lines={easterEggLyrics}
+                  url={easterEgg.geniusUrl}
+                  title={easterEgg.title}
+                  artist={easterEgg.artist}
+                  progress={eggProgress}
+                />
               </div>
             </motion.div>
           ) : (
@@ -282,7 +266,7 @@ export function TeamProfileCard({
             egg={easterEgg}
             open={eggOpen}
             onOpenChange={setEggOpen}
-            onTime={setEggTime}
+            onProgress={setEggProgress}
             onPlayingChange={setEggPlaying}
             backHref={backHref}
             backLabel={backLabel}

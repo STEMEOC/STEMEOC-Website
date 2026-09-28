@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTeamMemberBySlug, teamMemberSlug } from "@/lib/content";
 import { EASTER_EGGS } from "@/lib/easter-egg";
+import { getGeniusLyrics } from "@/lib/genius";
 import { getDictionary } from "@/lib/i18n";
 import { Reveal } from "@/components/motion/Reveal";
 import { TeamCard } from "@/components/TeamCard";
@@ -38,6 +39,8 @@ export default async function TeamMemberPage({ params }: PageProps<"/team/[slug]
 
   const { member, index, team } = found;
   const bio = paragraphs(member.bio);
+  const easterEgg = EASTER_EGGS[teamMemberSlug(member)];
+  const easterEggLyrics = easterEgg ? await getGeniusLyrics(easterEgg.geniusSongId) : null;
 
   // The next few teammates, wrapping around, so every profile leads somewhere new.
   const more = Array.from(
@@ -54,7 +57,8 @@ export default async function TeamMemberPage({ params }: PageProps<"/team/[slug]
           aboutLabel={dict.team.aboutMe}
           backLabel={dict.team.backToTeam}
           backHref="/about#team"
-          easterEgg={EASTER_EGGS[teamMemberSlug(member)]}
+          easterEgg={easterEgg}
+          easterEggLyrics={easterEggLyrics}
         />
       </section>
 
