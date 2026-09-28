@@ -9,7 +9,7 @@ import { teamMemberSlug } from "@/lib/content";
  */
 export function TeamCard({
   member,
-  sizes = "(max-width: 768px) 50vw, 300px",
+  sizes = "(max-width: 768px) 50vw, 400px",
 }: {
   member: { id: string; name: string; role: string; photoUrl: string | null };
   sizes?: string;
@@ -25,7 +25,9 @@ export function TeamCard({
             src={member.photoUrl}
             alt=""
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            quality={90}
+            // Portraits are taller than the square frame: anchor to the top so heads aren't cropped.
+            className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
             sizes={sizes}
           />
         )}
