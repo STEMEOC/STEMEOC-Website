@@ -232,8 +232,12 @@ export function TeamProfileCard({
           ) : (
             <motion.div
               key="bio"
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.3, ease: EASE }}
+              // Its own variants, so the stagger replays when the bio comes back
+              // after the player closes (inherited ones would stay "hidden").
+              variants={textGroup}
+              initial="hidden"
+              animate="show"
+              exit={{ opacity: 0, y: -16, transition: { duration: 0.3, ease: EASE } }}
             >
               {member.bio.length > 0 && (
                 <div className="mt-8 max-w-3xl">
