@@ -8,10 +8,13 @@ export function RowActions({
   editHref,
   onDelete,
   copyPath,
+  deleteLabel,
 }: {
   editHref: string;
   onDelete: (formData: FormData) => void;
   copyPath?: string;
+  /** Names the item in the delete confirmation. */
+  deleteLabel?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -23,7 +26,7 @@ export function RowActions({
   }
 
   return (
-    <div className="flex items-center justify-end gap-2">
+    <div className="flex items-center justify-end gap-0.5 sm:gap-2">
       {copyPath && (
         <button
           type="button"
@@ -43,7 +46,13 @@ export function RowActions({
       >
         <PencilSimple size={16} weight="bold" />
       </Link>
-      <form action={onDelete}>
+      <form
+        action={onDelete}
+        onSubmit={(e) => {
+          const what = deleteLabel ? `"${deleteLabel}"` : "this item";
+          if (!confirm(`Delete ${what}? This can't be undone.`)) e.preventDefault();
+        }}
+      >
         <button
           type="submit"
           aria-label="Delete"
