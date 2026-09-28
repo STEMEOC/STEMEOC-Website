@@ -259,9 +259,15 @@ async function main() {
   }
 
   // ---- Programs ("dt_portfolio") ----
-  const PROGRAM_META: Record<string, { slug: string; category: string; order: number }> = {
+  // `title` overrides the WordPress title where it names a single year.
+  const PROGRAM_META: Record<string, { slug: string; category: string; order: number; title?: string }> = {
     "Annual STEM Festivals": { slug: "annual-stem-festivals", category: "festival", order: 0 },
-    "Cambodia Robotics Olympiad 2024 (CRO)": { slug: "cambodia-robotics-olympiad", category: "robotics", order: 1 },
+    "Cambodia Robotics Olympiad 2024 (CRO)": {
+      slug: "cambodia-robotics-olympiad",
+      category: "robotics",
+      order: 1,
+      title: "Cambodia Robotics Olympiad (CRO)",
+    },
     "Eco-STEM": { slug: "eco-stem", category: "eco", order: 2 },
     "International Creativity and Innovation Award (ICIA)": { slug: "icia", category: "innovation", order: 3 },
     "STEM Sisters": { slug: "stem-sisters", category: "community", order: 4 },
@@ -285,7 +291,7 @@ async function main() {
     await prisma.program.create({
       data: {
         slug: meta.slug,
-        title,
+        title: meta.title ?? title,
         description,
         category: meta.category,
         coverImageUrl,

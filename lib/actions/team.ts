@@ -5,12 +5,13 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { invalidateTag } from "@/lib/cache";
+import { resolveImageField } from "@/lib/uploads";
 
 const TeamSchema = z.object({
   name: z.string().trim().min(1).max(200),
   role: z.string().trim().min(1).max(200),
   bio: z.string().trim().min(1).max(2000),
-  photoUrl: z.string().trim().url().optional().or(z.literal("")),
+  photoUrl: z.string().trim().max(500),
   order: z.coerce.number().int(),
   published: z.coerce.boolean(),
 });
@@ -27,7 +28,7 @@ export async function createTeamMember(formData: FormData) {
     name: formData.get("name"),
     role: formData.get("role"),
     bio: formData.get("bio"),
-    photoUrl: formData.get("photoUrl") || "",
+    photoUrl: await resolveImageField(formData, "photoUrl", "team"),
     order: formData.get("order") || 0,
     published: formData.get("published") === "on",
   });
@@ -42,7 +43,7 @@ export async function updateTeamMember(id: string, formData: FormData) {
     name: formData.get("name"),
     role: formData.get("role"),
     bio: formData.get("bio"),
-    photoUrl: formData.get("photoUrl") || "",
+    photoUrl: await resolveImageField(formData, "photoUrl", "team"),
     order: formData.get("order") || 0,
     published: formData.get("published") === "on",
   });

@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { AnimatePresence, motion } from "motion/react";
+import { ArrowRight, Check, ShareNetwork } from "@phosphor-icons/react";
 import { Reveal } from "@/components/motion/Reveal";
 import type { Dictionary } from "@/lib/i18n";
 
@@ -16,212 +18,248 @@ type NewsPost = {
   publishedAt: Date | null;
 };
 
-const ACCENT_COLORS = ["var(--color-blue)", "var(--color-red)", "var(--color-green)", "var(--color-orange)"];
-
-const CATEGORY_COLORS: Record<string, string> = {
-  Competition: "var(--color-orange)",
-  Events: "var(--color-green)",
-  News: "var(--color-blue)",
-};
+const PAGE_SIZE = 6;
+const SIDEBAR_PER_GROUP = 3;
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 function formatDate(date: Date) {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  return new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
+/** Shares the post with the native share sheet, or copies its link. */
+function ShareButton({ post, labels }: { post: NewsPost; labels: { share: string; linkCopied: string } }) {
+  const [copied, setCopied] = useState(false);
+
+  async function share() {
+    const url = `${window.location.origin}/news/${post.slug}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: post.title, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // Share sheet dismissed or clipboard blocked; nothing to do.
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={share}
+      aria-label={labels.share}
+      className="press relative flex size-10 items-center justify-center rounded-full text-navy hover:bg-navy/5"
+    >
+      {copied ? <Check size={24} weight="bold" /> : <ShareNetwork size={24} />}
+      <AnimatePresence>
+        {copied && (
+          <motion.span
+            role="status"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="absolute bottom-full left-0 mb-2 whitespace-nowrap rounded-md bg-navy px-2.5 py-1 text-xs font-semibold text-white"
+          >
+            {labels.linkCopied}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </button>
+  );
+}
+
+/**
+ * News list (Figma "News landing page"): category tabs, a sidebar of the
+ * latest posts per category, and a feed of large post cards.
+ */
 export function NewsExplorer({
   posts,
   dict,
   common,
+  heading,
+  notice,
 }: {
   posts: NewsPost[];
   dict: Dictionary["news"];
   common: Dictionary["common"];
+  heading: string;
+  notice?: ReactNode;
 }) {
-  const categories = useMemo(() => {
-    const unique = Array.from(new Set(posts.map((p) => p.category)));
-    return [dict.filterAll, ...unique];
-  }, [posts, dict.filterAll]);
-
+  const categories = useMemo(() => Array.from(new Set(posts.map((p) => p.category))), [posts]);
+  const tabs = [dict.filterAll, ...categories];
   const [active, setActive] = useState(dict.filterAll);
+  const [visible, setVisible] = useState(PAGE_SIZE);
 
   const filtered = active === dict.filterAll ? posts : posts.filter((p) => p.category === active);
-  const [featured, ...remaining] = filtered;
-  const sideList = remaining.slice(0, 3);
-  const rest = remaining.slice(3);
+  const shown = filtered.slice(0, visible);
+
+  // With a single category its name would just repeat the page title.
+  const groups = categories.map((category) => ({
+    category,
+    label: categories.length > 1 ? category : dict.latest,
+    posts: posts.filter((p) => p.category === category).slice(0, SIDEBAR_PER_GROUP),
+  }));
+
+  function selectTab(tab: string) {
+    setActive(tab);
+    setVisible(PAGE_SIZE);
+  }
 
   return (
     <>
-      {/* Category filter */}
-      <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
-        {categories.map((cat) => {
-          const isActive = cat === active;
-          const color = CATEGORY_COLORS[cat] ?? "var(--color-blue)";
-          return (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setActive(cat)}
-              className="rounded-full border-2 px-4 py-2 text-sm font-bold transition-all duration-200"
-              style={
-                isActive
-                  ? { backgroundColor: color, borderColor: color, color: "var(--color-paper)" }
-                  : { backgroundColor: "transparent", borderColor: "rgba(23,24,43,0.12)", color: "var(--color-ink)" }
-              }
-            >
-              {cat}
-            </button>
-          );
-        })}
+      {/* Title + category tabs */}
+      <div className="flex flex-col gap-6 border-b border-navy/15 pb-6 lg:flex-row lg:items-end lg:justify-between">
+        <h1 className="font-display text-3xl font-bold uppercase md:text-5xl">{heading}</h1>
+        <div role="tablist" className="-mx-1 flex overflow-x-auto px-1">
+          {tabs.map((tab, i) => {
+            const isActive = tab === active;
+            return (
+              <button
+                key={tab}
+                role="tab"
+                type="button"
+                aria-selected={isActive}
+                onClick={() => selectTab(tab)}
+                className={`relative shrink-0 whitespace-nowrap border-navy px-5 py-2 text-lg press first:pl-0 not-first:border-l hover:text-navy/70 md:px-7 md:text-xl ${
+                  isActive ? "font-bold" : "font-normal"
+                }`}
+              >
+                {tab}
+                {isActive && (
+                  <motion.span
+                    layoutId="news-tab-underline"
+                    className={`absolute bottom-0 right-5 h-[3px] rounded-full bg-navy md:right-8 ${i === 0 ? "left-0" : "left-5 md:left-8"}`}
+                    transition={{ duration: 0.45, ease: EASE }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {filtered.length === 0 ? (
-        <p className="text-ink/60">{dict.emptyCategory}</p>
-      ) : (
-        <>
-          {/* Featured post + next up list */}
-          <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-            <Reveal key={featured.id}>
-              <Link
-                href={`/news/${featured.slug}`}
-                className="group relative flex flex-col overflow-hidden rounded-[1.75rem] bg-paper-dim p-3 shadow-lg ring-1 ring-black/5 transition-all duration-300 hover:shadow-2xl md:h-[420px] md:flex-row"
-              >
-                {featured.coverImageUrl && (
-                  <div className="relative h-64 w-full shrink-0 overflow-hidden rounded-[1.5rem] bg-paper md:h-full md:w-1/2">
-                    <Image
-                      src={featured.coverImageUrl}
-                      alt=""
-                      fill
-                      className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, 480px"
-                    />
-                  </div>
-                )}
-                <div className="flex flex-1 flex-col justify-center p-8 md:p-10">
-                  <span
-                    className="font-mono-label text-xs font-bold uppercase tracking-wide"
-                    style={{ color: CATEGORY_COLORS[featured.category] ?? "var(--color-blue)" }}
-                  >
-                    {featured.category}
-                    {featured.publishedAt && ` · ${formatDate(featured.publishedAt)}`}
-                  </span>
-                  <h2 className="mt-3 line-clamp-3 font-display text-2xl font-semibold leading-snug tracking-tight">
-                    {featured.title}
-                  </h2>
-                  <p className="mt-4 line-clamp-3 text-base leading-relaxed text-ink/65">{featured.excerpt}</p>
-                  <span
-                    className="mt-6 inline-flex w-fit items-center gap-1.5 text-sm font-bold"
-                    style={{ color: CATEGORY_COLORS[featured.category] ?? "var(--color-blue)" }}
-                  >
-                    {common.readMore}
-                    <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
-                  </span>
-                </div>
-              </Link>
-            </Reveal>
+      {notice}
 
-            {sideList.length > 0 && (
-              <div className="flex flex-col gap-4">
-                {sideList.map((post, i) => {
-                  const color = ACCENT_COLORS[(i + 1) % ACCENT_COLORS.length];
-                  return (
-                    <Reveal key={post.id} delay={i * 0.06} className="h-full">
-                      <Link
-                        href={`/news/${post.slug}`}
-                        className="group flex h-full items-center gap-4 rounded-2xl bg-paper-dim p-3 shadow-sm ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                      >
-                        {post.coverImageUrl && (
-                          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-paper">
+      <div className="mt-12 grid gap-16 lg:grid-cols-[28rem_minmax(0,1fr)] xl:gap-24">
+        {/* Sidebar: latest posts per category */}
+        <aside className="order-last lg:order-first">
+          <div className="space-y-10 lg:sticky lg:top-32">
+            {groups.map((group) => (
+              <div key={group.category}>
+                <h2 className="font-display text-2xl font-bold uppercase md:text-3xl">{group.label}</h2>
+                <ul className="mt-7 space-y-7">
+                  {group.posts.map((post) => (
+                    <li key={post.id}>
+                      <Link href={`/news/${post.slug}`} className="group flex items-start gap-4">
+                        <span className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-navy">
+                          {post.coverImageUrl && (
                             <Image
                               src={post.coverImageUrl}
                               alt=""
                               fill
-                              className="object-cover transition-transform duration-500 group-hover:scale-110"
                               sizes="80px"
+                              className="object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                          )}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="line-clamp-2 text-lg font-bold leading-snug transition-colors group-hover:text-navy/70">
+                            {post.title}
+                          </span>
+                          <span className="mt-1.5 line-clamp-2 text-base text-navy/60">{post.excerpt}</span>
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        {/* Feed */}
+        <div className="mx-auto w-full max-w-2xl">
+          {filtered.length === 0 ? (
+            <p className="text-navy/60">{dict.emptyCategory}</p>
+          ) : (
+            <ol className="divide-y divide-navy/15">
+              {shown.map((post, i) => (
+                <li key={post.id} className="py-12 first:pt-0">
+                  <Reveal scroll={0}>
+                    <article>
+                      <Link href={`/news/${post.slug}`} className="group block">
+                        <h2 className="font-body text-2xl font-bold leading-snug transition-colors group-hover:text-navy/75 md:text-2xl">
+                          {post.title}
+                        </h2>
+                      </Link>
+                      {post.excerpt && (
+                        <p className="mt-3 line-clamp-3 text-base leading-relaxed md:text-lg">{post.excerpt}</p>
+                      )}
+                      <p className="mt-3 flex items-center gap-2 text-xs text-navy/55">
+                        <span>{post.category}</span>
+                        {post.publishedAt && (
+                          <>
+                            <span aria-hidden className="h-3 w-px bg-navy/30" />
+                            <time dateTime={new Date(post.publishedAt).toISOString()}>{formatDate(post.publishedAt)}</time>
+                          </>
+                        )}
+                      </p>
+
+                      {post.coverImageUrl && (
+                        <Link
+                          href={`/news/${post.slug}`}
+                          tabIndex={-1}
+                          aria-hidden
+                          className="group mt-5 block overflow-hidden rounded-xl bg-navy/5"
+                        >
+                          <div className="relative aspect-[4/3]">
+                            <Image
+                              src={post.coverImageUrl}
+                              alt=""
+                              fill
+                              sizes="(max-width: 768px) 100vw, 672px"
+                              className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
                             />
                           </div>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <span
-                            className="font-mono-label text-[10px] font-bold uppercase tracking-wide"
-                            style={{ color: CATEGORY_COLORS[post.category] ?? color }}
-                          >
-                            {post.category}
-                            {post.publishedAt && ` · ${formatDate(post.publishedAt)}`}
-                          </span>
-                          <h3 className="mt-1 line-clamp-2 font-display text-sm font-semibold leading-tight">
-                            {post.title}
-                          </h3>
-                          <span
-                            className="mt-1.5 inline-flex items-center gap-1 text-xs font-bold"
-                            style={{ color: CATEGORY_COLORS[post.category] ?? color }}
-                          >
-                            {common.readMore}
-                            <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
-                          </span>
-                        </div>
-                      </Link>
-                    </Reveal>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Rest of the posts */}
-          {rest.length > 0 && (
-            <div className="mt-12 grid gap-6 sm:grid-cols-2">
-              {rest.map((post, i) => {
-                const color = CATEGORY_COLORS[post.category] ?? ACCENT_COLORS[i % ACCENT_COLORS.length];
-                return (
-                  <Reveal key={post.id} delay={Math.min(i, 8) * 0.05} className="h-full">
-                    <Link
-                      href={`/news/${post.slug}`}
-                      className="group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] bg-paper p-3 shadow-lg ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
-                    >
-                      {post.coverImageUrl && (
-                        <div className="relative h-64 w-full overflow-hidden rounded-2xl">
-                          <Image
-                            src={post.coverImageUrl}
-                            alt=""
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                            sizes="(max-width: 768px) 100vw, 400px"
-                          />
-                        </div>
+                        </Link>
                       )}
-                      <div className="flex flex-1 flex-col px-3 pb-2 pt-5">
-                        <span
-                          className="font-mono-label text-[11px] font-bold uppercase tracking-wide"
-                          style={{ color: CATEGORY_COLORS[post.category] ?? color }}
+
+                      <div className="mt-5 flex items-center justify-between">
+                        <ShareButton post={post} labels={{ share: dict.share, linkCopied: dict.linkCopied }} />
+                        <Link
+                          href={`/news/${post.slug}`}
+                          className="group inline-flex items-center gap-2 rounded-full bg-navy py-2.5 pl-6 pr-5 text-sm font-bold uppercase text-white press hover:-translate-y-0.5 hover:bg-navy/90 hover:shadow-[0_10px_22px_-10px_rgb(5_19_59/0.7)]"
                         >
-                          {post.category}
-                          {post.publishedAt && ` · ${formatDate(post.publishedAt)}`}
-                        </span>
-                        <h2 className="mt-1.5 font-display text-xl font-semibold leading-tight">{post.title}</h2>
-                        <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-ink/60">
-                          {post.excerpt}
-                        </p>
-                        <span className="mt-5 inline-flex w-fit items-center gap-1.5 text-sm font-bold" style={{ color }}>
                           {common.readMore}
-                          <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
-                        </span>
+                          <ArrowRight
+                            size={16}
+                            weight="bold"
+                            className="transition-transform duration-300 group-hover:translate-x-1"
+                          />
+                        </Link>
                       </div>
-                      <div
-                        className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
-                        style={{ backgroundColor: color }}
-                      />
-                    </Link>
+                    </article>
                   </Reveal>
-                );
-              })}
+                </li>
+              ))}
+            </ol>
+          )}
+
+          {visible < filtered.length && (
+            <div className="flex justify-center border-t border-navy/15 pt-10">
+              <button
+                type="button"
+                onClick={() => setVisible((v) => v + PAGE_SIZE)}
+                className="rounded-full border-2 border-navy px-8 py-3 text-sm font-bold uppercase btn-sweep press [--sweep:var(--color-navy)] hover:text-white"
+              >
+                {dict.loadMore}
+              </button>
             </div>
           )}
-        </>
-      )}
+        </div>
+      </div>
     </>
   );
 }

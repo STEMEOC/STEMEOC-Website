@@ -3,106 +3,157 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gauge, Newspaper, UsersThree, GraduationCap, Handshake, Microphone, ClipboardText, SignOut, PencilSimple } from "@phosphor-icons/react/dist/ssr";
+import {
+  SquaresFour,
+  Newspaper,
+  UsersThree,
+  GraduationCap,
+  Handshake,
+  Microphone,
+  ClipboardText,
+  ChatCircleText,
+  SignOut,
+  ArrowSquareOut,
+  Question,
+} from "@phosphor-icons/react/dist/ssr";
 import { logoutAction } from "@/lib/actions/auth";
 
-const NAV_ITEMS = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: Gauge, color: "var(--color-orange)" },
-  { href: "/admin/news", label: "News", icon: Newspaper, color: "var(--color-green)" },
-  { href: "/admin/team", label: "Team", icon: UsersThree, color: "var(--color-blue)" },
-  { href: "/admin/programs", label: "Programs", icon: GraduationCap, color: "var(--color-red)" },
-  { href: "/admin/partners", label: "Partners", icon: Handshake, color: "var(--color-orange)" },
-  { href: "/admin/podcast", label: "Podcast", icon: Microphone, color: "var(--color-green)" },
-  { href: "/admin/forms", label: "Forms", icon: ClipboardText, color: "var(--color-blue)" },
+const NAV_GROUPS = [
+  {
+    label: null,
+    items: [{ href: "/admin/dashboard", label: "Dashboard", icon: SquaresFour }],
+  },
+  {
+    label: "Content",
+    items: [
+      { href: "/admin/news", label: "News", icon: Newspaper },
+      { href: "/admin/programs", label: "Programs", icon: GraduationCap },
+      { href: "/admin/podcast", label: "Podcast", icon: Microphone },
+    ],
+  },
+  {
+    label: "Responses",
+    items: [
+      { href: "/admin/messages", label: "Messages", icon: ChatCircleText },
+      { href: "/admin/forms", label: "Forms", icon: ClipboardText },
+    ],
+  },
+  {
+    label: "People",
+    items: [
+      { href: "/admin/team", label: "Team", icon: UsersThree },
+      { href: "/admin/partners", label: "Partners", icon: Handshake },
+    ],
+  },
 ];
 
-const BRAND_COLORS = ["var(--color-blue)", "var(--color-red)", "var(--color-green)", "var(--color-orange)"];
+const LOGO_COLORS = ["bg-green", "bg-orange", "bg-red", "bg-blue"];
 
+/** Navy admin sidebar, in the same colors as the public site's header. */
 export function AdminSidebar({ userName, avatarUrl }: { userName: string; avatarUrl: string | null }) {
   const pathname = usePathname();
   const initial = userName.trim().charAt(0).toUpperCase() || "A";
 
   return (
-    <aside className="relative flex w-72 shrink-0 flex-col justify-between overflow-hidden border-r-2 border-ink/10 bg-paper px-5 py-8">
-      <div
-        className="dot-field pointer-events-none absolute -right-10 -top-10 h-40 w-40 text-ink/[0.06]"
-        aria-hidden="true"
-      />
+    <aside className="sticky top-0 flex h-screen w-80 shrink-0 flex-col bg-navy text-white">
+      <div className="grid grid-cols-4" aria-hidden>
+        {LOGO_COLORS.map((c) => (
+          <span key={c} className={`h-1.5 ${c}`} />
+        ))}
+      </div>
 
-      <div className="relative">
-        <Link href="/admin/dashboard" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl">
-            <Image src="/STEM-logo.png" alt="" width={36} height={36} className="h-full w-full object-cover" />
-          </span>
-          <span className="flex flex-col leading-none">
-            <span className="font-display text-lg font-bold text-ink">STEMEOC</span>
-            <span className="mt-1 w-fit rounded-full bg-ink px-2 py-0.5 font-mono-label text-[9px] text-paper">
-              Admin
-            </span>
-          </span>
+      <Link href="/admin/dashboard" className="flex items-center gap-4 px-7 pb-8 pt-8">
+        <Image src="/brand/logo-mark.png" alt="" width={400} height={395} className="h-14 w-auto" priority />
+        <span className="flex flex-col">
+          <span className="font-display text-2xl font-bold leading-none">STEMEOC</span>
+          <span className="font-mono-label mt-1.5 text-xs uppercase tracking-[0.2em] text-orange">Admin</span>
+        </span>
+      </Link>
+
+      <nav className="flex-1 overflow-y-auto px-4">
+        {NAV_GROUPS.map((group, gi) => (
+          <div key={gi} className={gi > 0 ? "mt-7" : undefined}>
+            {group.label && (
+              <p className="font-mono-label mb-2 px-4 text-xs uppercase tracking-[0.15em] text-white/40">
+                {group.label}
+              </p>
+            )}
+            <ul className="space-y-1">
+              {group.items.map((item) => {
+                const active = pathname.startsWith(item.href);
+                const Icon = item.icon;
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={`flex h-13 items-center gap-4 rounded-2xl px-4 text-base font-semibold transition-colors ${
+                        active ? "bg-white text-navy" : "text-white/70 hover:bg-white/10 hover:text-white"
+                      }`}
+                    >
+                      <Icon size={22} weight={active ? "fill" : "regular"} />
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </nav>
+
+      <div className="space-y-1 border-t border-white/10 px-4 py-5">
+        <Link
+          href="/admin/help"
+          aria-current={pathname.startsWith("/admin/help") ? "page" : undefined}
+          className={`flex h-12 items-center gap-4 rounded-2xl px-4 text-base font-semibold transition-colors ${
+            pathname.startsWith("/admin/help")
+              ? "bg-white text-navy"
+              : "text-white/70 hover:bg-white/10 hover:text-white"
+          }`}
+        >
+          <Question size={22} weight={pathname.startsWith("/admin/help") ? "fill" : "regular"} />
+          Help
         </Link>
+        <a
+          href="/"
+          target="_blank"
+          rel="noreferrer"
+          className="flex h-12 items-center gap-4 rounded-2xl px-4 text-base font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <ArrowSquareOut size={22} />
+          View website
+        </a>
 
-        <div className="relative mt-7 flex flex-col items-center rounded-2xl border-2 border-ink/10 bg-paper px-3 py-5">
+        <div className="!mt-3 flex items-center gap-3 rounded-2xl bg-white/[0.06] p-3">
           <Link
             href="/admin/profile"
-            aria-label="Edit profile"
-            className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full text-ink/30 transition-colors hover:bg-blue/10 hover:text-blue"
+            className="flex min-w-0 flex-1 items-center gap-3 rounded-xl transition-opacity hover:opacity-80"
+            aria-label={`${userName}, edit profile`}
           >
-            <PencilSimple size={13} weight="bold" />
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange text-lg font-bold text-navy">
+              {avatarUrl ? (
+                <Image src={avatarUrl} alt="" width={44} height={44} className="h-full w-full object-cover" />
+              ) : (
+                initial
+              )}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-base font-bold">{userName}</span>
+              <span className="block text-sm text-white/50">Edit profile</span>
+            </span>
           </Link>
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange text-xl font-bold text-ink">
-            {avatarUrl ? (
-              <Image src={avatarUrl} alt="" width={56} height={56} className="h-full w-full object-cover" />
-            ) : (
-              initial
-            )}
-          </div>
-          <p className="mt-3 max-w-full truncate text-sm font-bold text-ink">{userName}</p>
-          <form action={logoutAction} className="mt-2">
+          <form action={logoutAction}>
             <button
               type="submit"
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono-label text-[10px] uppercase text-ink/40 transition-colors hover:bg-red/10 hover:text-red"
+              aria-label="Sign out"
+              title="Sign out"
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-white/60 transition-colors hover:bg-red hover:text-white"
             >
-              <SignOut size={13} weight="bold" />
-              Sign out
+              <SignOut size={20} />
             </button>
           </form>
         </div>
-
-        <nav className="mt-7 space-y-1.5">
-          {NAV_ITEMS.map((item) => {
-            const active = pathname.startsWith(item.href);
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200 ${
-                  active
-                    ? "-translate-x-0.5 text-paper shadow-pop-sm"
-                    : "text-ink/50 hover:translate-x-0.5 hover:bg-ink/5 hover:text-ink"
-                }`}
-                style={active ? { backgroundColor: item.color } : undefined}
-              >
-                <span
-                  className="flex h-8 w-8 items-center justify-center rounded-lg"
-                  style={{
-                    backgroundColor: active ? "rgba(255,255,255,0.2)" : "transparent",
-                  }}
-                >
-                  <Icon size={16} weight="bold" />
-                </span>
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-
-      <div className="relative grid grid-cols-4 overflow-hidden rounded-full">
-        {BRAND_COLORS.map((c) => (
-          <div key={c} className="h-1.5" style={{ backgroundColor: c }} />
-        ))}
       </div>
     </aside>
   );

@@ -13,19 +13,16 @@ export function PageHeader({
   cta?: { label: string; href: string; icon?: ReactNode };
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="flex flex-wrap items-end justify-between gap-6">
       <div>
-        <p className="inline-flex items-center gap-1.5 font-mono-label text-xs uppercase text-ink/40">
-          <span className="h-1.5 w-1.5 rounded-full bg-orange" />
-          {eyebrow}
-        </p>
-        <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">{title}</h1>
-        {description && <p className="mt-2 max-w-xl text-sm text-ink/60">{description}</p>}
+        <p className="font-mono-label text-sm uppercase tracking-[0.15em] text-navy/50">{eyebrow}</p>
+        <h1 className="mt-2 font-display text-4xl font-bold text-navy lg:text-5xl">{title}</h1>
+        {description && <p className="mt-3 max-w-2xl text-lg text-navy/65">{description}</p>}
       </div>
       {cta && (
         <Link
           href={cta.href}
-          className="shadow-pop-hover flex items-center gap-2 rounded-2xl bg-blue px-5 py-3 text-sm font-bold text-paper shadow-pop-sm"
+          className="flex h-13 items-center gap-2 rounded-full bg-navy px-6 text-base font-bold text-white transition-colors hover:bg-blue-deep"
         >
           {cta.icon}
           {cta.label}

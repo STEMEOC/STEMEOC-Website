@@ -1,3 +1,4 @@
+import { ImageField } from "@/components/admin/ImageField";
 import type { TeamMember } from "@prisma/client";
 
 export function TeamForm({
@@ -43,16 +44,7 @@ export function TeamForm({
         />
       </div>
 
-      <div>
-        <label htmlFor="photoUrl" className="text-sm font-medium">Photo URL</label>
-        <input
-          id="photoUrl"
-          name="photoUrl"
-          defaultValue={member?.photoUrl ?? ""}
-          placeholder="https://…"
-          className="mt-2 w-full rounded-lg border border-ink/15 bg-paper px-4 py-3 text-sm outline-none focus:border-blue"
-        />
-      </div>
+      <ImageField name="photoUrl" label="Photo" defaultValue={member?.photoUrl} />
 
       <div>
         <label htmlFor="order" className="text-sm font-medium">Display order</label>

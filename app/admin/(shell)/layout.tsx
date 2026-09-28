@@ -14,7 +14,7 @@ export default async function AdminShellLayout({ children }: { children: React.R
         userName={admin?.name ?? session?.user?.email ?? "Admin"}
         avatarUrl={admin?.avatarUrl ?? null}
       />
-      <main className="flex-1 px-10 py-10 lg:px-14 lg:py-12">{children}</main>
+      <main className="min-w-0 flex-1 px-8 py-10 lg:px-14 lg:py-14">{children}</main>
     </div>
   );
 }

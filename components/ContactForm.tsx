@@ -75,7 +75,7 @@ export function ContactForm({ labels }: { labels: ContactFormLabels }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-blue px-7 py-3.5 text-sm font-bold text-paper transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+        className="rounded-full bg-blue px-7 py-3.5 text-sm font-bold text-paper press hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-12px_rgb(44_128_194/0.8)] disabled:opacity-60 disabled:hover:translate-y-0"
       >
         {pending ? labels.sending : labels.sendMessage}
       </button>

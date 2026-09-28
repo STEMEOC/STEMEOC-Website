@@ -55,7 +55,7 @@ export default async function NewsPostPage({ params }: PageProps<"/news/[slug]">
     <PageTransition>
       <section className="bg-paper-dim py-20">
         <div className="mx-auto max-w-6xl px-6">
-          <Link href="/news" className="text-sm font-bold text-blue hover:underline">
+          <Link href="/news" className="link-underline text-sm font-bold text-blue">
             {dict.news.backToNews}
           </Link>
 
@@ -115,7 +115,7 @@ export default async function NewsPostPage({ params }: PageProps<"/news/[slug]">
                         <Link
                           key={item.id}
                           href={`/news/${item.slug}`}
-                          className="group flex items-center gap-3 rounded-2xl p-2 transition-colors duration-200 hover:bg-paper-dim"
+                          className="group flex items-center gap-3 rounded-2xl p-2 transition-[background-color,translate] duration-300 hover:translate-x-1 hover:bg-paper-dim"
                         >
                           {item.coverImageUrl && (
                             <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-paper-dim">

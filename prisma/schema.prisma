@@ -165,6 +165,8 @@ model FormField {
   options  String[]      @default([])
   required Boolean       @default(false)
   order    Int           @default(0)
+  /// Set when the question is removed from the form. Kept so old answers stay readable.
+  archivedAt DateTime?
 
   @@index([formId, order])
 }

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { invalidateTag } from "@/lib/cache";
+import { resolveImageField } from "@/lib/uploads";
 import { auth } from "@/auth";
 
 const NewsSchema = z.object({
@@ -17,7 +18,7 @@ const NewsSchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens only"),
   excerpt: z.string().trim().min(1).max(500),
   body: z.string().trim().min(1),
-  coverImageUrl: z.string().trim().url().optional().or(z.literal("")),
+  coverImageUrl: z.string().trim().max(500),
   published: z.coerce.boolean(),
 });
 
@@ -37,7 +38,7 @@ export async function createNews(formData: FormData) {
     slug: formData.get("slug"),
     excerpt: formData.get("excerpt"),
     body: formData.get("body"),
-    coverImageUrl: formData.get("coverImageUrl") || "",
+    coverImageUrl: await resolveImageField(formData, "coverImageUrl", "news"),
     published: formData.get("published") === "on",
   });
 
@@ -60,7 +61,7 @@ export async function updateNews(id: string, formData: FormData) {
     slug: formData.get("slug"),
     excerpt: formData.get("excerpt"),
     body: formData.get("body"),
-    coverImageUrl: formData.get("coverImageUrl") || "",
+    coverImageUrl: await resolveImageField(formData, "coverImageUrl", "news"),
     published: formData.get("published") === "on",
   });
 

@@ -6,7 +6,37 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+// Server actions accept up to 10MB per request (next.config.ts), so keep files under that.
+const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB
+
+// Only documents and photos. The saved extension comes from this list, never
+// from the uploader, so nothing a browser would run (HTML, SVG, JS) can be stored.
+const ALLOWED_UPLOADS: Record<string, string[]> = {
+  pdf: ["application/pdf"],
+  jpg: ["image/jpeg"],
+  jpeg: ["image/jpeg"],
+  png: ["image/png"],
+  webp: ["image/webp"],
+  gif: ["image/gif"],
+  heic: ["image/heic", "image/heif"],
+  doc: ["application/msword"],
+  docx: ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  xls: ["application/vnd.ms-excel"],
+  xlsx: ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
+  ppt: ["application/vnd.ms-powerpoint"],
+  pptx: ["application/vnd.openxmlformats-officedocument.presentationml.presentation"],
+  txt: ["text/plain"],
+};
+
+/** Returns a safe extension for the file, or null if the type isn't allowed. */
+function safeExtension(file: File): string | null {
+  const ext = path.extname(file.name).slice(1).toLowerCase();
+  const types = ALLOWED_UPLOADS[ext];
+  if (!types) return null;
+  // Some systems send no type (or a generic one) for Office files; the extension is still checked above.
+  if (file.type && file.type !== "application/octet-stream" && !types.includes(file.type)) return null;
+  return ext === "jpeg" ? "jpg" : ext;
+}
 
 export type FormSubmitState = {
   status: "idle" | "success" | "error";
@@ -33,7 +63,7 @@ export async function submitFormResponse(
 
   const form = await prisma.form.findUnique({
     where: { id: formId },
-    include: { fields: { orderBy: { order: "asc" } } },
+    include: { fields: { where: { archivedAt: null }, orderBy: { order: "asc" } } },
   });
 
   if (!form || !form.published) {
@@ -65,14 +95,18 @@ export async function submitFormResponse(
         continue;
       }
       if (file.size > MAX_FILE_SIZE) {
-        fieldErrors[field.id] = "File must be under 10MB.";
+        fieldErrors[field.id] = "File must be under 8MB.";
+        continue;
+      }
+      const ext = safeExtension(file);
+      if (!ext) {
+        fieldErrors[field.id] = "Please upload a PDF, photo, Word, Excel, PowerPoint or text file.";
         continue;
       }
 
       const dir = path.join(process.cwd(), "public", "uploads", "forms", formId);
       await mkdir(dir, { recursive: true });
-      const ext = path.extname(file.name) || "";
-      const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+      const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const buffer = Buffer.from(await file.arrayBuffer());
       await writeFile(path.join(dir, filename), buffer);
       data[field.id] = `/uploads/forms/${formId}/${filename}`;

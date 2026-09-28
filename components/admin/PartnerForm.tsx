@@ -1,3 +1,4 @@
+import { ImageField } from "@/components/admin/ImageField";
 import type { Partner } from "@prisma/client";
 
 export function PartnerForm({
@@ -20,17 +21,7 @@ export function PartnerForm({
         />
       </div>
 
-      <div>
-        <label htmlFor="logoUrl" className="text-sm font-medium">Logo URL</label>
-        <input
-          id="logoUrl"
-          name="logoUrl"
-          defaultValue={partner?.logoUrl}
-          placeholder="/placeholders/partner-1.svg"
-          required
-          className="mt-2 w-full rounded-lg border border-ink/15 bg-paper px-4 py-3 text-sm outline-none focus:border-blue"
-        />
-      </div>
+      <ImageField name="logoUrl" label="Logo" defaultValue={partner?.logoUrl} fit="contain" required />
 
       <div>
         <label htmlFor="websiteUrl" className="text-sm font-medium">Website URL</label>

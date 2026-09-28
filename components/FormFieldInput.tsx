@@ -49,6 +49,7 @@ export function FieldInput({ field, disabled = false, dark = false }: { field: F
           id={field.id}
           name={field.id}
           type="file"
+          accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
           required={field.required}
           disabled={disabled}
           className={`mt-2 w-full text-sm ${dark ? "text-paper/70" : "text-ink/70"} file:mr-4 file:rounded-full file:border-0 file:bg-blue file:px-4 file:py-2 file:text-sm file:font-bold file:text-paper disabled:cursor-not-allowed disabled:opacity-50`}

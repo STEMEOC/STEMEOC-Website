@@ -1,3 +1,4 @@
+import { ImageField } from "@/components/admin/ImageField";
 import type { NewsPost } from "@prisma/client";
 
 export function NewsForm({
@@ -56,16 +57,7 @@ export function NewsForm({
         />
       </div>
 
-      <div>
-        <label htmlFor="coverImageUrl" className="text-sm font-medium">Cover image URL</label>
-        <input
-          id="coverImageUrl"
-          name="coverImageUrl"
-          defaultValue={post?.coverImageUrl ?? ""}
-          placeholder="https://…"
-          className="mt-2 w-full rounded-lg border border-ink/15 bg-paper px-4 py-3 text-sm outline-none focus:border-blue"
-        />
-      </div>
+      <ImageField name="coverImageUrl" label="Cover image" defaultValue={post?.coverImageUrl} />
 
       <label className="flex items-center gap-2 text-sm font-medium">
         <input type="checkbox" name="published" defaultChecked={post?.published} />

@@ -166,7 +166,7 @@ export function ProgramsCarousel({
           type="button"
           aria-label="Previous program"
           onClick={() => goTo(active - 1)}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-paper text-ink shadow-md transition-transform hover:-translate-y-0.5"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-paper text-ink shadow-md press hover:-translate-x-0.5 hover:-translate-y-0.5"
         >
           <CaretLeft size={18} weight="bold" />
         </button>
@@ -175,7 +175,7 @@ export function ProgramsCarousel({
           type="button"
           aria-label="Next program"
           onClick={() => goTo(active + 1)}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-paper text-ink shadow-md transition-transform hover:-translate-y-0.5"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-paper text-ink shadow-md press hover:translate-x-0.5 hover:-translate-y-0.5"
         >
           <CaretRight size={18} weight="bold" />
         </button>

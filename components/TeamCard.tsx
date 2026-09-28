@@ -1,42 +1,40 @@
 import Link from "next/link";
 import Image from "next/image";
+import { ArrowDownRight } from "@phosphor-icons/react/dist/ssr";
 import { teamMemberSlug } from "@/lib/content";
 
-/** Portrait card linking to a team member's profile page. */
+/**
+ * Square portrait with name and role beneath, linking to the member's profile
+ * page. The text inherits its color, so it works on white and navy sections.
+ */
 export function TeamCard({
   member,
-  color,
-  sizes = "(max-width: 768px) 50vw, 220px",
+  sizes = "(max-width: 768px) 50vw, 300px",
 }: {
   member: { id: string; name: string; role: string; photoUrl: string | null };
-  color: string;
   sizes?: string;
 }) {
   return (
     <Link
       href={`/team/${teamMemberSlug(member)}`}
-      className="group relative flex h-full aspect-[4/5] w-full items-end justify-center overflow-hidden rounded-2xl bg-ink-soft shadow-sm outline-offset-4 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-blue"
+      className="group block rounded-2xl text-center outline-offset-4 focus-visible:outline-2 focus-visible:outline-navy"
     >
-      {member.photoUrl && (
-        <Image
-          src={member.photoUrl}
-          alt={member.name}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
-          sizes={sizes}
-        />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-      <div
-        className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
-        style={{ backgroundColor: color }}
-      />
-      <div className="relative p-4 text-center">
-        <h3 className="font-display text-sm font-semibold leading-tight text-paper">{member.name}</h3>
-        <p className="mt-1 text-xs font-semibold" style={{ color }}>
-          {member.role}
-        </p>
+      <div className="relative aspect-square overflow-hidden rounded-2xl bg-placeholder">
+        {member.photoUrl && (
+          <Image
+            src={member.photoUrl}
+            alt=""
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes={sizes}
+          />
+        )}
+        <span className="absolute bottom-3 right-3 flex size-9 items-center justify-center rounded-full bg-navy text-white transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-rotate-45 group-hover:scale-110 group-active:scale-90 md:size-11">
+          <ArrowDownRight size={20} weight="bold" />
+        </span>
       </div>
+      <h3 className="mt-4 font-body text-lg font-bold leading-tight md:text-xl">{member.name}</h3>
+      <p className="mt-1 text-sm opacity-80">{member.role}</p>
     </Link>
   );
 }

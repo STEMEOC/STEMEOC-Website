@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { invalidateTag } from "@/lib/cache";
+import { resolveImageField } from "@/lib/uploads";
 
 const PartnerSchema = z.object({
   name: z.string().trim().min(1).max(200),
@@ -23,7 +24,7 @@ async function revalidatePartners() {
 export async function createPartner(formData: FormData) {
   const data = PartnerSchema.parse({
     name: formData.get("name"),
-    logoUrl: formData.get("logoUrl"),
+    logoUrl: await resolveImageField(formData, "logoUrl", "partners"),
     websiteUrl: formData.get("websiteUrl") || "",
     order: formData.get("order") || 0,
     published: formData.get("published") === "on",
@@ -37,7 +38,7 @@ export async function createPartner(formData: FormData) {
 export async function updatePartner(id: string, formData: FormData) {
   const data = PartnerSchema.parse({
     name: formData.get("name"),
-    logoUrl: formData.get("logoUrl"),
+    logoUrl: await resolveImageField(formData, "logoUrl", "partners"),
     websiteUrl: formData.get("websiteUrl") || "",
     order: formData.get("order") || 0,
     published: formData.get("published") === "on",

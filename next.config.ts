@@ -6,10 +6,16 @@ import type { NextConfig } from "next";
 const STATIC_ASSET_CACHE = "public, max-age=86400, stale-while-revalidate=604800";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // The 1MB default rejects most photos uploaded through admin forms.
+    serverActions: { bodySizeLimit: "10mb" },
+  },
   images: {
     remotePatterns: [{ protocol: "https", hostname: "i.ytimg.com" }],
     // AVIF is ~20% smaller than WebP; browsers without AVIF get WebP.
     formats: ["image/avif", "image/webp"],
+    // 75 is the default; 90 is for large portraits where faces go soft at 75.
+    qualities: [75, 90],
     // Optimized images are keyed by URL and uploads are never edited in
     // place, so cache them for 30 days instead of the 4-hour default.
     minimumCacheTTL: 60 * 60 * 24 * 30,
@@ -17,6 +23,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/uploads/:path*", headers: [{ key: "Cache-Control", value: STATIC_ASSET_CACHE }] },
+      // Files uploaded by the public: always download, never render on this site,
+      // so a disguised file can't run scripts with an admin's session.
+      {
+        source: "/uploads/forms/:formId/:file",
+        headers: [
+          { key: "Content-Disposition", value: "attachment" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Content-Security-Policy", value: "default-src 'none'; sandbox" },
+        ],
+      },
       { source: "/:file(STEM-logo.*\\.png)", headers: [{ key: "Cache-Control", value: STATIC_ASSET_CACHE }] },
     ];
   },

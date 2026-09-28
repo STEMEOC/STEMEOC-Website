@@ -72,7 +72,7 @@ export default async function ContactPage() {
               const Icon = card.icon;
               const Wrapper = card.href ? "a" : "div";
               return (
-                <Reveal key={card.label} delay={i * 0.06} className="h-full">
+                <Reveal key={card.label} scroll={(i % 3) * 0.16} className="h-full">
                   <Wrapper
                     {...(card.href ? { href: card.href } : {})}
                     className="group flex h-full flex-col rounded-[1.5rem] bg-paper p-6 shadow-lg ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"

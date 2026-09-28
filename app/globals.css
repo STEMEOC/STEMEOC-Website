@@ -1,11 +1,13 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* Playful STEM-for-kids direction: bright white, bold friendly type, big
-   flat solid-color shapes (never gradients). The four brand colors come
-   straight from the logo and are used generously and confidently: full
-   circles, chunky blocks, filled buttons. */
+/* 2026 redesign (Figma "STEM Website UX Design"): deep navy and white,
+   Maven Pro for headings, Montserrat for body. Sections are joined by a
+   slanted navy "tab" (see .tab-slant-*). The four logo colors are kept for
+   the logo itself and small accents only. */
 @theme {
+  --color-navy: #05133b;
+  --color-placeholder: #d9d9d9;
   --color-ink: #17182b;
   --color-ink-soft: #2a2c47;
   --color-paper: #f5f7fa;
@@ -15,35 +17,147 @@
   --color-red: #e5262a;
   --color-green: #14a650;
   --color-orange: #f49423;
+
+  /* Display sizes a step tighter than Tailwind's defaults, so the big page
+     and section titles stay in proportion on laptop screens. */
+  --text-4xl: 2rem;
+  --text-4xl--line-height: 1.15;
+  --text-5xl: 2.5rem;
+  --text-5xl--line-height: 1.1;
+  --text-6xl: 3rem;
+  --text-6xl--line-height: 1.05;
+  --text-7xl: 3.5rem;
+  --text-7xl--line-height: 1;
 }
 
 /* Fonts come from next/font, which injects real values via a CSS variable
    on <html>. @theme inline forwards that runtime value into Tailwind's
-   utility generation instead of baking in a static one. */
+   utility generation instead of baking in a static one.
+   Every stack ends in Kantumruy Pro: the Latin fonts have no Khmer glyphs,
+   so Khmer characters always fall through to it (never to a system font),
+   while Latin text keeps Maven Pro / Montserrat. */
 @theme inline {
-  --font-display: var(--font-display);
-  --font-body: var(--font-body);
-  --font-mono: var(--font-mono);
-  --font-khmer: var(--font-khmer);
+  --font-display: var(--font-display), var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body), var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), var(--font-khmer), ui-monospace, monospace;
+  --font-sans: var(--font-body), var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+  --font-khmer: var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  background: var(--color-paper);
-  color: var(--color-ink);
+  background: #ffffff;
+  color: var(--color-navy);
   font-family: var(--font-body), var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
 }
 
-h1, h2, h3, h4 {
-  font-family: var(--font-display), var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+/* Overall scale. Type and spacing are in rem, so this sizes the whole site
+   at once. Set as a percentage so a reader's own browser font size still
+   applies (16px default shown):
+     phones 16px · tablets 15px · laptops 13px · 1440px+ screens 13.5px,
+   and 13px on any wide screen that is short (e.g. 1366×768, or
+   1920×1080 at 125% scaling), where tall heroes and cards ran off-screen. */
+html {
+  font-size: 100%;
+  @media (width >= 48rem) {
+    font-size: 93.75%;
+  }
+  @media (width >= 64rem) {
+    font-size: 81.25%;
+  }
+  @media (width >= 90rem) {
+    font-size: 84.375%;
+  }
+  @media (width >= 64rem) and (height <= 50rem) {
+    font-size: 81.25%;
+  }
+}
+
+/* In the base layer so a font-* utility on a heading can override it. */
+@layer base {
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+  }
 }
 
 .font-mono-label {
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-mono), var(--font-khmer), ui-monospace, monospace;
   letter-spacing: 0.04em;
 }
 
 .font-khmer {
   font-family: var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Khmer stacks vowels and subscripts above and below the line, so the tight
+   line heights used for Latin headings would clip them. Loosen them when the
+   page is in Khmer. */
+html:lang(km) :is(.leading-none, .leading-tight, .leading-snug, .leading-\[1\.05\]) {
+  line-height: 1.45;
+}
+
+/* Page gutter: the side margin grows with the screen, from 20px on phones
+   to ~100px on wide screens (the Figma frames are 1920 wide with 100px side
+   margins). It lives in --gutter so pieces that bleed to the screen edge on
+   small screens (-mx-(--gutter) px-(--gutter)) or snap to it
+   (scroll-px-(--gutter)) always match. */
+@utility container-site {
+  --gutter: clamp(1.25rem, 5vw, 7rem);
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1440px;
+  padding-inline: var(--gutter);
+}
+
+/* The slanted edge that joins a navy block to the white area beside it.
+   The diagonal cuts the block's top-right or bottom-right corner; --slant
+   is its horizontal run. Utilities, so they take responsive variants. */
+@utility tab-slant-top {
+  clip-path: polygon(0 0, calc(100% - var(--slant, 5rem)) 0, 100% 100%, 0 100%);
+}
+
+@utility tab-slant-bottom {
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--slant, 5rem)) 100%, 0 100%);
+}
+
+/* Mirror of tab-slant-bottom, for a block flush with the right edge. */
+@utility tab-slant-bottom-left {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, var(--slant, 5rem) 100%);
+}
+
+/* Slim pill scrollbar for sideways rails on navy: no arrow buttons, a faint
+   track inset to the container gutter so it lines up with the cards, and a
+   thumb that brightens on hover. Chrome ignores ::-webkit-scrollbar once
+   scrollbar-color is set, so the standard properties are Firefox-only. */
+@utility scrollbar-rail {
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
+  &::-webkit-scrollbar-track {
+    margin-inline: var(--gutter, 0);
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.1);
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.45);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgb(255 255 255 / 0.75);
+  }
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.45) rgb(255 255 255 / 0.1);
+  }
+}
+
+/* Project card with the notched bottom-right corner that holds the "Detail"
+   pill (Figma "Rectangle 5"). Keep the element at aspect 405/331 so the
+   corner radii aren't distorted. */
+.card-notch {
+  mask: url("/brand/card-shape.svg") center / 100% 100% no-repeat;
 }
 
 /* Soft polka-dot texture for playful section backdrops */
@@ -118,6 +232,109 @@ h1, h2, h3, h4 {
 
 .animate-float-c {
   animation: float-c 24s ease-in-out infinite, pulse-soft 9s ease-in-out infinite 1s;
+}
+
+/* Micro-interactions. Small, fast responses to hover and press so every
+   control feels physical. They animate the individual `scale`/`translate`
+   properties, so they stack with Tailwind's translate and scale utilities
+   instead of fighting over `transform`. */
+
+/* Pressable control: eases colors on hover, dips slightly when pressed.
+   Replaces transition-colors/transition-transform on the element. */
+@utility press {
+  transition-property: color, background-color, background-size, border-color, opacity, box-shadow, transform,
+    translate, scale, rotate;
+  transition-duration: 220ms;
+  transition-timing-function: var(--ease-out-expo);
+  &:active {
+    scale: 0.96;
+    transition-duration: 90ms;
+  }
+}
+
+/* Text link whose underline draws in from the left on hover and stays drawn
+   for the current page (aria-current). Sits under the content box, so side
+   padding doesn't stretch it. */
+@utility link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-origin: content-box;
+  background-position: left bottom;
+  background-size: 0% 2px;
+  padding-bottom: 2px;
+  transition: background-size 350ms var(--ease-out-expo), color 200ms ease, opacity 200ms ease;
+  &:hover,
+  &:focus-visible,
+  &[aria-current="page"] {
+    background-size: 100% 2px;
+  }
+}
+
+/* Outlined pill that fills with a solid wash sliding in from the left.
+   Set the wash color with --sweep and the hover text color with a
+   hover:text-* utility. */
+@utility btn-sweep {
+  background-image: linear-gradient(var(--sweep, white), var(--sweep, white));
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 0% 100%;
+  &:hover,
+  &:focus-visible {
+    background-size: 100% 100%;
+  }
+}
+
+/* Dropdown panels and menus open with a short drop-and-settle. */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    translate: 0 -8px;
+    scale: 0.97;
+  }
+}
+
+@utility animate-pop-in {
+  transform-origin: top;
+  animation: pop-in 260ms var(--ease-out-expo) both;
+}
+
+/* Items inside an opening menu follow the panel in, one after another.
+   Stagger with an inline --i index. */
+@keyframes item-in {
+  from {
+    opacity: 0;
+    translate: -6px 0;
+  }
+}
+
+@utility animate-item-in {
+  animation: item-in 320ms var(--ease-out-expo) both;
+  animation-delay: calc(var(--i, 0) * 35ms + 60ms);
+}
+
+/* A row that drifts sideways forever. The row holds its items twice, so
+   moving it by half its width loops seamlessly. */
+@keyframes marquee {
+  to {
+    translate: -50% 0;
+  }
+}
+
+@utility animate-marquee {
+  animation: marquee var(--marquee-duration, 60s) linear infinite;
+}
+
+/* Icon swap (e.g. menu ↔ close): spins in from a quarter turn. */
+@keyframes icon-swap {
+  from {
+    opacity: 0;
+    rotate: -90deg;
+    scale: 0.6;
+  }
+}
+
+@utility animate-icon-swap {
+  animation: icon-swap 280ms var(--ease-out-expo) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -51,14 +51,19 @@ export function ShareButtons({ slug, title }: { slug: string; title: string }) {
               rel="noreferrer"
               onMouseEnter={() => setHovered(link.label)}
               onMouseLeave={() => setHovered(null)}
-              className="flex items-center gap-2 rounded-full border-2 px-4 py-2.5 text-sm font-bold transition-colors duration-200"
+              className="group press flex items-center gap-2 rounded-full border-2 px-4 py-2.5 text-sm font-bold hover:-translate-y-0.5"
               style={{
                 borderColor: link.color,
                 color: isHovered ? "#ffffff" : link.color,
                 backgroundColor: isHovered ? link.color : "transparent",
               }}
             >
-              <Icon size={20} weight="fill" color={isHovered ? "#ffffff" : link.color} />
+              <Icon
+                size={20}
+                weight="fill"
+                color={isHovered ? "#ffffff" : link.color}
+                className="transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-rotate-12 group-hover:scale-110"
+              />
               {link.label}
             </a>
           );

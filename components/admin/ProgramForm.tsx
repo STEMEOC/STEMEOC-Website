@@ -1,3 +1,4 @@
+import { ImageField } from "@/components/admin/ImageField";
 import type { Program } from "@prisma/client";
 
 export function ProgramForm({
@@ -56,16 +57,7 @@ export function ProgramForm({
         />
       </div>
 
-      <div>
-        <label htmlFor="coverImageUrl" className="text-sm font-medium">Cover image URL</label>
-        <input
-          id="coverImageUrl"
-          name="coverImageUrl"
-          defaultValue={program?.coverImageUrl ?? ""}
-          placeholder="https://…"
-          className="mt-2 w-full rounded-lg border border-ink/15 bg-paper px-4 py-3 text-sm outline-none focus:border-blue"
-        />
-      </div>
+      <ImageField name="coverImageUrl" label="Cover image" defaultValue={program?.coverImageUrl} />
 
       <div>
         <label htmlFor="order" className="text-sm font-medium">Display order</label>

@@ -104,9 +104,10 @@ export function getFormBySlug(slug: string) {
     `forms:slug:${slug}`,
     TTL,
     () =>
+      // Closed forms are returned too, so the page can say "closed" instead of 404.
       prisma.form.findFirst({
-        where: { slug, published: true },
-        include: { fields: { orderBy: { order: "asc" } } },
+        where: { slug },
+        include: { fields: { where: { archivedAt: null }, orderBy: { order: "asc" } } },
       }),
     ["forms"]
   );

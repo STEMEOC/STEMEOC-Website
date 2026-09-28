@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Edit Form" };
 
 export default async function EditFormPage({ params }: PageProps<"/admin/forms/[id]/edit">) {
   const { id } = await params;
-  const form = await prisma.form.findUnique({ where: { id }, include: { fields: { orderBy: { order: "asc" } } } });
+  const form = await prisma.form.findUnique({ where: { id }, include: { fields: { where: { archivedAt: null }, orderBy: { order: "asc" } } } });
   if (!form) notFound();
 
   return (

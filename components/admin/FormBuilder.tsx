@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState, type CSSProperties } from "react";
+import { startTransition, useActionState, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import type { FormSaveState } from "@/lib/actions/forms";
 import type { Form, FormField, FormFieldType, FormLayout, FormTheme } from "@prisma/client";
 import {
   Plus,
@@ -8,7 +9,11 @@ import {
   ArrowUp,
   ArrowDown,
   Eye,
-  PencilSimple,
+  ListChecks,
+  PaintBrush,
+  LinkSimple,
+  Copy,
+  SpinnerGap,
   TextAa,
   TextAlignLeft,
   EnvelopeSimple,
@@ -79,28 +84,169 @@ const FIELD_TYPES: {
 const FIELD_TYPE_META = new Map(FIELD_TYPES.map((t) => [t.value, t]));
 const OPTION_TYPES = new Set<FormFieldType>(["DROPDOWN", "MULTIPLE_CHOICE", "CHECKBOXES"]);
 
-function newField(): FieldDraft {
-  return { id: crypto.randomUUID(), label: "", type: "SHORT_TEXT", options: [], required: false };
+const TABS = [
+  { id: "questions", label: "Questions", icon: ListChecks },
+  { id: "design", label: "Design & preview", icon: PaintBrush },
+] as const;
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/[\s-]+/g, "-")
+    .slice(0, 80);
+}
+
+function newField(type: FormFieldType = "SHORT_TEXT"): FieldDraft {
+  return {
+    id: crypto.randomUUID(),
+    label: "",
+    type,
+    options: OPTION_TYPES.has(type) ? ["Option 1"] : [],
+    required: false,
+  };
+}
+
+function Switch({ on, onToggle, color, small = false }: { on: boolean; onToggle: () => void; color: string; small?: boolean }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      onClick={onToggle}
+      className={`relative shrink-0 rounded-full transition-colors ${small ? "h-5 w-9" : "h-6 w-11"}`}
+      style={{ backgroundColor: on ? color : "rgb(5 19 59 / 0.2)" }}
+    >
+      <span
+        className={`absolute top-0.5 rounded-full bg-white shadow transition-[left] ${small ? "h-4 w-4" : "h-5 w-5"} ${
+          on ? (small ? "left-[1.125rem]" : "left-[1.375rem]") : "left-0.5"
+        }`}
+      />
+    </button>
+  );
+}
+
+function SaveButton({ disabled, pending, label }: { disabled: boolean; pending: boolean; label: string }) {
+  return (
+    <button
+      type="submit"
+      disabled={disabled || pending}
+      title={disabled ? "Add at least one question first" : undefined}
+      className="flex h-11 items-center gap-2 rounded-full bg-navy px-6 text-sm font-bold text-white transition-colors hover:bg-blue-deep disabled:opacity-50"
+    >
+      {pending ? <SpinnerGap size={16} weight="bold" className="animate-spin" /> : <Check size={16} weight="bold" />}
+      {pending ? "Saving…" : label}
+    </button>
+  );
+}
+
+function IconButton({
+  label,
+  onClick,
+  disabled,
+  danger,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  danger?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+      className={`flex h-9 w-9 items-center justify-center rounded-full text-navy/50 transition-colors disabled:opacity-25 ${
+        danger ? "hover:bg-red hover:text-white" : "hover:bg-navy/5 hover:text-navy"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** The circle / square / number in front of each choice, as respondents see it. */
+function OptionMarker({ type, index }: { type: FormFieldType; index: number }) {
+  if (type === "DROPDOWN") return <span className="w-5 shrink-0 text-right text-sm text-navy/40">{index + 1}.</span>;
+  return (
+    <span
+      className={`h-5 w-5 shrink-0 border-2 border-navy/25 ${type === "CHECKBOXES" ? "rounded" : "rounded-full"}`}
+      aria-hidden
+    />
+  );
+}
+
+const ANSWER_SAMPLES: Partial<Record<FormFieldType, { text: string; icon?: typeof TextAa; wide?: boolean }>> = {
+  SHORT_TEXT: { text: "Short answer" },
+  PARAGRAPH: { text: "Long answer", wide: true },
+  EMAIL: { text: "name@example.com", icon: EnvelopeSimple },
+  NUMBER: { text: "Number", icon: HashStraight },
+  DATE: { text: "Day / month / year", icon: CalendarBlank },
+  FILE: { text: "People upload a file (up to 10MB)", icon: Paperclip },
+};
+
+/** A faded example of the answer box, so it's clear what people will fill in. */
+function AnswerSample({ type }: { type: FormFieldType }) {
+  const sample = ANSWER_SAMPLES[type];
+  if (!sample) return null;
+  const Icon = sample.icon;
+  return (
+    <p
+      className={`flex items-center gap-2 border-b border-dotted border-navy/25 pb-2 text-sm text-navy/40 ${
+        sample.wide ? "w-full sm:w-4/5" : "w-full sm:w-1/2"
+      }`}
+    >
+      {Icon && <Icon size={16} />}
+      {sample.text}
+    </p>
+  );
 }
 
 export function FormBuilder({
   action,
   form,
+  initialTemplate,
 }: {
-  action: (formData: FormData) => void;
+  action: (prev: FormSaveState, formData: FormData) => Promise<FormSaveState>;
   form?: Form & { fields: FormField[] };
+  /** New forms only: pre-fill from a template picked on the Forms page. */
+  initialTemplate?: FormTemplate;
 }) {
+  const tpl = form ? undefined : initialTemplate;
   const [fields, setFields] = useState<FieldDraft[]>(
-    form?.fields.map((f) => ({ id: f.id, label: f.label, type: f.type, options: f.options, required: f.required })) ?? []
+    form?.fields.map((f) => ({ id: f.id, label: f.label, type: f.type, options: f.options, required: f.required })) ??
+      // Deterministic ids so the server and client render the same markup.
+      tpl?.fields.map((f, i) => ({
+        id: `${tpl.id}-${i}`,
+        label: f.label,
+        type: f.type,
+        options: f.options ?? [],
+        required: f.required ?? false,
+      })) ??
+      []
   );
-  const [title, setTitle] = useState(form?.title ?? "");
-  const [slug, setSlug] = useState(form?.slug ?? "");
-  const [description, setDescription] = useState(form?.description ?? "");
-  const [mode, setMode] = useState<"edit" | "preview">("edit");
-  const [templateId, setTemplateId] = useState<string | null>(null);
-  const [accentColor, setAccentColor] = useState(form?.accentColor ?? "#2c80c2");
-  const [layout, setLayout] = useState<FormLayout>(form?.layout ?? "CLASSIC");
-  const [theme, setTheme] = useState<FormTheme>(form?.theme ?? "LIGHT");
+  const [title, setTitle] = useState(form?.title ?? tpl?.title ?? "");
+  const [slug, setSlug] = useState(form?.slug ?? tpl?.slug ?? "");
+  const [description, setDescription] = useState(form?.description ?? tpl?.formDescription ?? "");
+  const [mode, setMode] = useState<"questions" | "design">("questions");
+  const [published, setPublished] = useState(form?.published ?? true);
+  // New forms fill the link from the title until someone edits it by hand.
+  const [slugTouched, setSlugTouched] = useState(Boolean(form));
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saveState, saveAction, saving] = useActionState(action, {});
+  const [dismissed, setDismissed] = useState<FormSaveState | null>(null);
+  const shownError = error ?? (saveState !== dismissed ? saveState.error : undefined);
+  const [templateId, setTemplateId] = useState<string | null>(tpl?.id ?? null);
+  const [accentColor, setAccentColor] = useState(form?.accentColor ?? tpl?.accentColor ?? "#2c80c2");
+  const [layout, setLayout] = useState<FormLayout>(form?.layout ?? tpl?.layout ?? "CLASSIC");
+  const [theme, setTheme] = useState<FormTheme>(form?.theme ?? tpl?.theme ?? "LIGHT");
   const [existingCoverImageUrl, setExistingCoverImageUrl] = useState(form?.coverImageUrl ?? "");
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(form?.coverImageUrl ?? null);
   const coverImageInputRef = useRef<HTMLInputElement | null>(null);
@@ -140,6 +286,43 @@ export function FormBuilder({
     );
   }
 
+  // Blank choices are dropped on save rather than failing validation.
+  const cleanFields = fields.map((f) => ({
+    ...f,
+    options: OPTION_TYPES.has(f.type) ? f.options.map((o) => o.trim()).filter(Boolean) : [],
+  }));
+
+  function focusSoon(selector: string) {
+    requestAnimationFrame(() => document.querySelector<HTMLInputElement>(selector)?.focus());
+  }
+
+  function addField(type: FormFieldType) {
+    const field = newField(type);
+    setFields((prev) => {
+      const at = prev.findIndex((f) => f.id === activeId);
+      if (at === -1) return [...prev, field];
+      return [...prev.slice(0, at + 1), field, ...prev.slice(at + 1)];
+    });
+    setActiveId(field.id);
+    setError(null);
+    focusSoon(`#q-${CSS.escape(field.id)}`);
+  }
+
+  function duplicateField(id: string) {
+    const copy = { ...fields.find((f) => f.id === id)!, id: crypto.randomUUID() };
+    copy.options = [...copy.options];
+    setFields((prev) => {
+      const at = prev.findIndex((f) => f.id === id);
+      return [...prev.slice(0, at + 1), copy, ...prev.slice(at + 1)];
+    });
+    setActiveId(copy.id);
+  }
+
+  function changeType(field: FieldDraft, type: FormFieldType) {
+    const needsOptions = OPTION_TYPES.has(type) && field.options.length === 0;
+    updateField(field.id, { type, ...(needsOptions ? { options: ["Option 1"] } : {}) });
+  }
+
   function updateField(id: string, patch: Partial<FieldDraft>) {
     setFields((prev) => prev.map((f) => (f.id === id ? { ...f, ...patch } : f)));
   }
@@ -159,8 +342,20 @@ export function FormBuilder({
     });
   }
 
-  function addOption(fieldId: string) {
-    setFields((prev) => prev.map((f) => (f.id === fieldId ? { ...f, options: [...f.options, ""] } : f)));
+  function addOption(fieldId: string, at?: number) {
+    let index = 0;
+    setFields((prev) =>
+      prev.map((f) => {
+        if (f.id !== fieldId) return f;
+        index = at ?? f.options.length;
+        const options = [...f.options];
+        options.splice(index, 0, "");
+        return { ...f, options };
+      })
+    );
+    requestAnimationFrame(() =>
+      document.querySelector<HTMLInputElement>(`[data-option="${CSS.escape(`${fieldId}-${index}`)}"]`)?.focus()
+    );
   }
 
   function updateOption(fieldId: string, index: number, value: string) {
@@ -181,252 +376,331 @@ export function FormBuilder({
   }
 
   return (
-    <form action={action} className={`space-y-8 ${mode === "preview" ? "w-full" : "max-w-2xl"}`}>
-      <input type="hidden" name="fields" value={JSON.stringify(fields)} />
+    <form
+      // Submitted by hand rather than via `action`, so React doesn't clear the
+      // form (and the chosen cover image) when the server sends back an error.
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        setError(null);
+        startTransition(() => saveAction(formData));
+      }}
+      onChange={() => {
+        setError(null);
+        setDismissed(saveState);
+      }}
+      onInvalidCapture={() => {
+        // A required box on the hidden tab can't show its own message, so bring it into view.
+        setMode("questions");
+        setError("Please fill in the highlighted boxes before saving.");
+      }}
+      className="w-full"
+    >
+      <input type="hidden" name="fields" value={JSON.stringify(cleanFields)} />
       <input type="hidden" name="accentColor" value={accentColor} />
       <input type="hidden" name="layout" value={layout} />
       <input type="hidden" name="theme" value={theme} />
       <input type="hidden" name="existingCoverImageUrl" value={existingCoverImageUrl} />
+      {published && <input type="hidden" name="published" value="on" />}
 
-      <div className="inline-flex rounded-full bg-ink/5 p-1">
-        <button
-          type="button"
-          onClick={() => setMode("edit")}
-          className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-colors ${
-            mode === "edit" ? "bg-paper text-ink shadow-sm" : "text-ink/50 hover:text-ink"
-          }`}
-        >
-          <PencilSimple size={14} weight="bold" />
-          Edit
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode("preview")}
-          className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-colors ${
-            mode === "preview" ? "bg-paper text-ink shadow-sm" : "text-ink/50 hover:text-ink"
-          }`}
-        >
-          <Eye size={14} weight="bold" />
-          Preview
-        </button>
+      {/* Toolbar: stays on screen so Save is always one click away */}
+      <div className="sticky top-0 z-20 -mx-8 mb-8 border-b border-navy/10 bg-paper-dim/90 px-8 py-3 backdrop-blur lg:-mx-14 lg:px-14">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex rounded-full bg-white p-1 ring-1 ring-navy/10" role="tablist">
+            {TABS.map((t) => {
+              const active = mode === t.id;
+              const Icon = t.icon;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setMode(t.id)}
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-colors ${
+                    active ? "bg-navy text-white" : "text-navy/60 hover:text-navy"
+                  }`}
+                >
+                  <Icon size={16} weight={active ? "fill" : "bold"} />
+                  {t.label}
+                  {t.id === "questions" && (
+                    <span className={`rounded-full px-1.5 text-xs ${active ? "bg-white/20" : "bg-navy/10"}`}>
+                      {fields.length}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="ml-auto flex items-center gap-4">
+            <label className="flex cursor-pointer items-center gap-2.5 text-sm font-semibold text-navy/70">
+              <Switch on={published} onToggle={() => setPublished((p) => !p)} color={accentColor} />
+              {published ? "Accepting responses" : "Closed"}
+            </label>
+            <SaveButton disabled={fields.length === 0} pending={saving} label={form ? "Save changes" : "Create form"} />
+          </div>
+        </div>
+        {shownError && (
+          <p className="mt-2 text-sm font-medium text-red" role="alert">
+            {shownError}
+          </p>
+        )}
       </div>
 
-      <div className={mode === "edit" ? "space-y-8" : "hidden"} aria-hidden={mode !== "edit"}>
+      {/* ---------------------------- Questions tab ---------------------------- */}
+      <div className={mode === "questions" ? "max-w-3xl space-y-4" : "hidden"}>
         {!form && (
-          <div className="space-y-3">
-            <p className="font-mono-label text-xs uppercase text-ink/40">Start from a template</p>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {FORM_TEMPLATES.map((template) => {
-                const active = templateId === template.id;
-                return (
-                  <button
-                    key={template.id}
-                    type="button"
-                    onClick={() => applyTemplate(template)}
-                    className={`relative flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-colors ${
-                      active
-                        ? "border-transparent bg-paper shadow-pop-sm ring-2 ring-blue"
-                        : "border-ink/15 bg-paper-dim hover:border-ink/30"
-                    }`}
-                  >
-                    {active && (
-                      <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-blue text-paper">
-                        <Check size={12} weight="bold" />
-                      </span>
-                    )}
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{ backgroundColor: template.color }}
-                    />
-                    <span className="text-sm font-bold text-ink">{template.label}</span>
-                    <span className="text-xs text-ink/50">{template.description}</span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="flex flex-wrap items-center gap-2 pb-2">
+            <span className="mr-1 text-sm font-semibold text-navy/50">Start from:</span>
+            {FORM_TEMPLATES.map((template) => {
+              const active = templateId === template.id;
+              return (
+                <button
+                  key={template.id}
+                  type="button"
+                  onClick={() => applyTemplate(template)}
+                  className={`flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors ${
+                    active ? "bg-navy text-white" : "bg-white text-navy ring-1 ring-navy/10 hover:ring-navy/30"
+                  }`}
+                >
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: template.accentColor }} />
+                  {template.label}
+                </button>
+              );
+            })}
           </div>
         )}
 
-        <div className="space-y-6 rounded-[2rem] bg-paper p-6 shadow-sm ring-1 ring-black/5 sm:p-8">
-          <div>
-            <label htmlFor="title" className="text-sm font-bold text-ink">Title</label>
+        {/* Title card */}
+        <section
+          className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-navy/10"
+          style={{ "--accent": accentColor } as CSSProperties}
+        >
+          <div className="h-2.5" style={{ backgroundColor: accentColor }} />
+          <div className="space-y-4 p-6 sm:p-8">
             <input
               id="title"
               name="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (!slugTouched) setSlug(slugify(e.target.value));
+              }}
+              placeholder="Untitled form"
+              aria-label="Form title"
               required
-              className="mt-2 w-full rounded-xl border border-ink/15 bg-paper-dim px-4 py-3 text-sm outline-none transition-colors focus:border-blue focus:bg-paper"
+              className="w-full border-b-2 border-transparent bg-transparent pb-2 font-display text-3xl font-bold text-navy outline-none transition-colors placeholder:text-navy/30 hover:border-navy/10 focus:border-[var(--accent)] user-invalid:border-red"
             />
-          </div>
-
-          <div>
-            <label htmlFor="slug" className="text-sm font-bold text-ink">Slug</label>
-            <input
-              id="slug"
-              name="slug"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              placeholder="volunteer-application"
-              required
-              className="mt-2 w-full rounded-xl border border-ink/15 bg-paper-dim px-4 py-3 text-sm font-mono outline-none transition-colors focus:border-blue focus:bg-paper"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="description" className="text-sm font-bold text-ink">Description</label>
             <textarea
               id="description"
               name="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="mt-2 w-full rounded-xl border border-ink/15 bg-paper-dim px-4 py-3 text-sm outline-none transition-colors focus:border-blue focus:bg-paper"
+              placeholder="Form description (optional): tell people what this form is for"
+              aria-label="Form description"
+              rows={2}
+              className="w-full resize-y border-b-2 border-transparent bg-transparent pb-2 text-base text-navy/80 outline-none transition-colors placeholder:text-navy/35 hover:border-navy/10 focus:border-[var(--accent)]"
             />
+            <div className="flex flex-wrap items-center gap-2 rounded-xl bg-paper-dim px-4 py-3 text-sm">
+              <LinkSimple size={16} weight="bold" className="text-navy/40" />
+              <span className="text-navy/50">Form link:</span>
+              <span className="font-mono text-navy/50">/apply/</span>
+              <input
+                id="slug"
+                name="slug"
+                value={slug}
+                onChange={(e) => {
+                  setSlugTouched(true);
+                  setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"));
+                }}
+                placeholder="volunteer-application"
+                aria-label="Form link"
+                required
+                pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                title="Lowercase letters, numbers and hyphens only"
+                className="min-w-40 flex-1 rounded-md bg-transparent px-1 font-mono text-navy outline-none focus:bg-white focus:ring-1 focus:ring-navy/20 user-invalid:text-red"
+              />
+            </div>
           </div>
+        </section>
 
-          <label className="flex items-center gap-2 text-sm font-bold text-ink">
-            <input type="checkbox" name="published" defaultChecked={form?.published ?? true} />
-            Published
-          </label>
-        </div>
+        {fields.length === 0 && (
+          <div className="rounded-2xl border-2 border-dashed border-navy/15 px-6 py-10 text-center">
+            <p className="text-base font-semibold text-navy">No questions yet</p>
+            <p className="mt-1 text-sm text-navy/55">Pick a question type below to add your first one.</p>
+          </div>
+        )}
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="font-mono-label text-xs uppercase text-ink/40">Questions</p>
-            <button
-              type="button"
-              onClick={() => setFields((prev) => [...prev, newField()])}
-              className="flex items-center gap-1.5 rounded-full bg-ink/5 px-3 py-1.5 text-xs font-bold text-ink transition-colors hover:bg-ink/10"
+        {fields.map((field, index) => {
+          const active = activeId === field.id;
+          const meta = FIELD_TYPE_META.get(field.type)!;
+          const TypeIcon = meta.icon;
+          return (
+            <section
+              key={field.id}
+              onFocusCapture={() => setActiveId(field.id)}
+              onClick={() => setActiveId(field.id)}
+              className={`relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 transition-shadow ${
+                active ? "shadow-lg shadow-navy/10 ring-navy/15" : "ring-navy/10"
+              }`}
+              style={{ "--accent": accentColor } as CSSProperties}
             >
-              <Plus size={14} weight="bold" />
-              Add question
-            </button>
-          </div>
-
-          {fields.length === 0 && (
-            <p className="rounded-2xl border border-dashed border-ink/15 px-4 py-8 text-center text-sm text-ink/50">
-              No questions yet. Add at least one.
-            </p>
-          )}
-
-          {fields.map((field, index) => {
-            const meta = FIELD_TYPE_META.get(field.type)!;
-            const Icon = meta.icon;
-            return (
-              <div key={field.id} className="space-y-3 rounded-2xl border border-ink/15 bg-paper-dim p-4 shadow-sm">
-                <div className="flex items-start gap-2">
-                  <span
-                    className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: `color-mix(in srgb, ${meta.color} 14%, transparent)`, color: meta.color }}
-                  >
-                    <Icon size={16} weight="bold" />
+              <span
+                className="absolute inset-y-0 left-0 w-1.5 transition-opacity"
+                style={{ backgroundColor: accentColor, opacity: active ? 1 : 0 }}
+                aria-hidden
+              />
+              <div className="p-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                  <span className="hidden h-12 w-8 shrink-0 items-center text-sm font-bold text-navy/35 sm:flex">
+                    {index + 1}.
                   </span>
                   <input
+                    id={`q-${field.id}`}
                     value={field.label}
                     onChange={(e) => updateField(field.id, { label: e.target.value })}
-                    placeholder="Question label"
+                    placeholder="Type your question"
+                    aria-label={`Question ${index + 1}`}
                     required
-                    className="flex-1 rounded-lg border border-ink/15 bg-paper px-3 py-2 text-sm outline-none focus:border-blue"
+                    className="h-12 min-w-0 flex-1 rounded-t-lg border-b-2 border-navy/10 bg-paper-dim px-4 text-base text-navy outline-none transition-colors placeholder:text-navy/35 focus:border-[var(--accent)] user-invalid:border-red"
                   />
-                  <select
-                    value={field.type}
-                    onChange={(e) => updateField(field.id, { type: e.target.value as FormFieldType })}
-                    className="rounded-lg border border-ink/15 bg-paper px-3 py-2 text-sm outline-none focus:border-blue"
-                  >
-                    {FIELD_TYPES.map((t) => (
-                      <option key={t.value} value={t.value}>{t.label}</option>
-                    ))}
-                  </select>
+                  <div className="relative sm:w-56">
+                    <TypeIcon
+                      size={18}
+                      weight="bold"
+                      className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+                      style={{ color: meta.color }}
+                    />
+                    <select
+                      value={field.type}
+                      onChange={(e) => changeType(field, e.target.value as FormFieldType)}
+                      aria-label="Question type"
+                      className="h-12 w-full appearance-none rounded-lg border border-navy/15 bg-white pl-11 pr-9 text-sm font-medium text-navy outline-none focus:border-navy/40"
+                    >
+                      {FIELD_TYPES.map((t) => (
+                        <option key={t.value} value={t.value}>
+                          {t.label}
+                        </option>
+                      ))}
+                    </select>
+                    <CaretDown
+                      size={14}
+                      weight="bold"
+                      className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-navy/40"
+                    />
+                  </div>
                 </div>
 
-                {OPTION_TYPES.has(field.type) && (
-                  <div className="space-y-2 pl-11">
-                    {field.options.map((opt, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <input
-                          value={opt}
-                          onChange={(e) => updateOption(field.id, i, e.target.value)}
-                          placeholder={`Option ${i + 1}`}
-                          className="flex-1 rounded-lg border border-ink/15 bg-paper px-3 py-1.5 text-sm outline-none focus:border-blue"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeOption(field.id, i)}
-                          aria-label="Remove option"
-                          className="text-ink/40 hover:text-red"
-                        >
-                          <Trash size={14} weight="bold" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => addOption(field.id)}
-                      className="text-xs font-bold text-blue hover:underline"
-                    >
-                      + Add option
-                    </button>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between pl-11">
-                  <label className="flex items-center gap-2 text-xs font-medium text-ink/70">
-                    <input
-                      type="checkbox"
-                      checked={field.required}
-                      onChange={(e) => updateField(field.id, { required: e.target.checked })}
-                    />
-                    Required
-                  </label>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => moveField(field.id, -1)}
-                      disabled={index === 0}
-                      aria-label="Move up"
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-ink/40 transition-colors hover:bg-ink/10 hover:text-ink disabled:opacity-30"
-                    >
-                      <ArrowUp size={14} weight="bold" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => moveField(field.id, 1)}
-                      disabled={index === fields.length - 1}
-                      aria-label="Move down"
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-ink/40 transition-colors hover:bg-ink/10 hover:text-ink disabled:opacity-30"
-                    >
-                      <ArrowDown size={14} weight="bold" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => removeField(field.id)}
-                      aria-label="Remove question"
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-ink/40 transition-colors hover:bg-red hover:text-paper"
-                    >
-                      <Trash size={14} weight="bold" />
-                    </button>
-                  </div>
+                {/* What the answer looks like, so it's clear what people will fill in */}
+                <div className="mt-4 sm:pl-11">
+                  {OPTION_TYPES.has(field.type) ? (
+                    <div className="space-y-1">
+                      {field.options.map((opt, i) => (
+                        <div key={i} className="group/opt flex items-center gap-3">
+                          <OptionMarker type={field.type} index={i} />
+                          <input
+                            value={opt}
+                            onChange={(e) => updateOption(field.id, i, e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                addOption(field.id, i + 1);
+                              }
+                            }}
+                            data-option={`${field.id}-${i}`}
+                            placeholder={`Option ${i + 1}`}
+                            aria-label={`Option ${i + 1}`}
+                            className="min-w-0 flex-1 border-b border-transparent bg-transparent py-2 text-sm text-navy outline-none hover:border-navy/10 focus:border-navy/30"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeOption(field.id, i)}
+                            aria-label={`Remove option ${i + 1}`}
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-navy/35 opacity-0 transition-opacity hover:bg-navy/5 hover:text-red focus:opacity-100 group-hover/opt:opacity-100"
+                          >
+                            <X size={16} weight="bold" />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => addOption(field.id)}
+                        className="flex items-center gap-3 py-2 text-sm text-navy/50 hover:text-navy"
+                      >
+                        <OptionMarker type={field.type} index={field.options.length} />
+                        Add option
+                      </button>
+                    </div>
+                  ) : (
+                    <AnswerSample type={field.type} />
+                  )}
                 </div>
               </div>
-            );
-          })}
-        </div>
 
-        <button
-          type="submit"
-          disabled={fields.length === 0}
-          className="shadow-pop-hover rounded-2xl bg-blue px-6 py-3 text-sm font-bold text-paper shadow-pop-sm disabled:opacity-50 disabled:shadow-none"
-        >
-          {form ? "Save changes" : "Create form"}
-        </button>
+              <div className="flex flex-wrap items-center justify-end gap-1 border-t border-navy/10 px-4 py-2.5">
+                <IconButton label="Move up" onClick={() => moveField(field.id, -1)} disabled={index === 0}>
+                  <ArrowUp size={18} />
+                </IconButton>
+                <IconButton label="Move down" onClick={() => moveField(field.id, 1)} disabled={index === fields.length - 1}>
+                  <ArrowDown size={18} />
+                </IconButton>
+                <IconButton label="Duplicate" onClick={() => duplicateField(field.id)}>
+                  <Copy size={18} />
+                </IconButton>
+                <IconButton label="Delete question" onClick={() => removeField(field.id)} danger>
+                  <Trash size={18} />
+                </IconButton>
+                <span className="mx-2 h-6 w-px bg-navy/10" aria-hidden />
+                <label className="flex cursor-pointer items-center gap-2.5 pr-2 text-sm font-medium text-navy/70">
+                  Required
+                  <Switch
+                    on={field.required}
+                    onToggle={() => updateField(field.id, { required: !field.required })}
+                    color={accentColor}
+                    small
+                  />
+                </label>
+              </div>
+            </section>
+          );
+        })}
+
+        {/* Add a question: one click per type */}
+        <section className="rounded-2xl border-2 border-dashed border-navy/15 p-5">
+          <p className="flex flex-wrap items-center gap-2 text-sm font-bold text-navy">
+            <Plus size={16} weight="bold" />
+            Add a question
+            {activeId && fields.some((f) => f.id === activeId) && (
+              <span className="font-normal text-navy/45">(it goes below the selected question)</span>
+            )}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {FIELD_TYPES.map((t) => {
+              const Icon = t.icon;
+              return (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => addField(t.value)}
+                  className="flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-sm font-semibold text-navy ring-1 ring-navy/10 transition-shadow hover:shadow-md hover:ring-navy/25"
+                >
+                  <Icon size={16} weight="bold" style={{ color: t.color }} />
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+        </section>
       </div>
 
-      {mode === "preview" && (
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-          <div className="space-y-6 rounded-[2rem] bg-paper p-6 shadow-sm ring-1 ring-black/5 sm:p-8 lg:w-[680px] lg:shrink-0">
-            <p className="font-mono-label text-xs uppercase text-ink/40">Style</p>
+      {/* ------------------------- Design & preview tab ------------------------- */}
+      <div className={mode === "design" ? "flex flex-col gap-6 2xl:flex-row 2xl:items-start" : "hidden"}>
+          <div className="space-y-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-navy/10 sm:p-8 2xl:w-[560px] 2xl:shrink-0">
+            <div>
+              <p className="font-display text-xl font-bold text-navy">Design</p>
+              <p className="mt-1 text-sm text-navy/55">Changes show in the preview straight away.</p>
+            </div>
 
             <div className="flex flex-col gap-6">
             <div>
@@ -647,11 +921,11 @@ export function FormBuilder({
             </div>
           </div>
 
-          <div className="min-w-0 flex-1 space-y-6 rounded-[2rem] bg-paper p-6 shadow-sm ring-1 ring-black/5 sm:p-8">
+          <div className="min-w-0 flex-1 space-y-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-navy/10 sm:p-8">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="flex items-center gap-1.5 whitespace-nowrap font-mono-label text-xs uppercase text-ink/40">
                 <Eye size={13} weight="bold" className="shrink-0" />
-                How applicants will see this — inputs are disabled
+                Live preview: how people will see your form
               </p>
               <div className="inline-flex shrink-0 rounded-full bg-ink/5 p-1">
                 <button
@@ -711,8 +985,7 @@ export function FormBuilder({
             )}
           </FormStyleFrame>
           </div>
-        </div>
-      )}
+      </div>
     </form>
   );
 }
