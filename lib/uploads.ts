@@ -15,6 +15,9 @@ export async function saveUpload(file: File, folder: string, filename: string): 
     });
     return blob.url;
   }
+  if (process.env.VERCEL) {
+    throw new Error("Uploads on Vercel need a Blob store: connect one so BLOB_READ_WRITE_TOKEN is set, then redeploy.");
+  }
 
   const dir = path.join(process.cwd(), "public", "uploads", folder);
   await mkdir(dir, { recursive: true });
