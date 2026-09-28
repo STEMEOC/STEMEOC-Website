@@ -1,10 +1,10 @@
 "use server";
 
-import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { saveUpload } from "@/lib/uploads";
 
 // Server actions accept up to 10MB per request (next.config.ts), so keep files under that.
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB
@@ -104,12 +104,8 @@ export async function submitFormResponse(
         continue;
       }
 
-      const dir = path.join(process.cwd(), "public", "uploads", "forms", formId);
-      await mkdir(dir, { recursive: true });
       const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await writeFile(path.join(dir, filename), buffer);
-      data[field.id] = `/uploads/forms/${formId}/${filename}`;
+      data[field.id] = await saveUpload(file, `forms/${formId}`, filename);
       continue;
     }
 

@@ -11,7 +11,11 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "10mb" },
   },
   images: {
-    remotePatterns: [{ protocol: "https", hostname: "i.ytimg.com" }],
+    remotePatterns: [
+      { protocol: "https", hostname: "i.ytimg.com" },
+      // Admin uploads when hosted on Vercel (see lib/uploads.ts).
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+    ],
     // AVIF is ~20% smaller than WebP; browsers without AVIF get WebP.
     formats: ["image/avif", "image/webp"],
     // 75 is the default; 90 is for large portraits where faces go soft at 75.

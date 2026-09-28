@@ -3,12 +3,11 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { invalidateTag } from "@/lib/cache";
+import { saveUpload } from "@/lib/uploads";
 
 const MAX_COVER_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -32,11 +31,8 @@ async function saveCoverImage(file: File): Promise<string> {
   const ext = COVER_EXTENSIONS[file.type];
   if (!ext) throw new FormSaveError("Cover image must be a JPG, PNG, WebP, GIF or AVIF.");
   if (file.size > MAX_COVER_IMAGE_SIZE) throw new FormSaveError("Cover image must be under 10MB.");
-  const dir = path.join(process.cwd(), "public", "uploads", "forms", "covers");
-  await mkdir(dir, { recursive: true });
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  await writeFile(path.join(dir, filename), Buffer.from(await file.arrayBuffer()));
-  return `/uploads/forms/covers/${filename}`;
+  return saveUpload(file, "forms/covers", filename);
 }
 
 /** An error whose message is safe and useful to show the admin. */

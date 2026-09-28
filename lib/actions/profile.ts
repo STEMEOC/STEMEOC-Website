@@ -1,12 +1,11 @@
 "use server";
 
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { saveUpload } from "@/lib/uploads";
 
 const AVATAR_EXTENSIONS: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -28,13 +27,8 @@ export async function updateProfile(formData: FormData) {
     const ext = AVATAR_EXTENSIONS[avatar.type];
     if (!ext) throw new Error("Unsupported image type. Use JPG, PNG, WebP, or GIF.");
 
-    const dir = path.join(process.cwd(), "public", "uploads", "avatars");
-    await mkdir(dir, { recursive: true });
-
     const filename = `${session.user.id}-${Date.now()}.${ext}`;
-    const buffer = Buffer.from(await avatar.arrayBuffer());
-    await writeFile(path.join(dir, filename), buffer);
-    avatarUrl = `/uploads/avatars/${filename}`;
+    avatarUrl = await saveUpload(avatar, "avatars", filename);
   }
 
   await prisma.admin.update({
