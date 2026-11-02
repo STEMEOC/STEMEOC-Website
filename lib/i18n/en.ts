@@ -18,6 +18,10 @@ export const en = {
       podcast: "Podcast",
       apply: "Apply",
       games: "Games",
+      whatWeDo: "What we do",
+      getInvolved: "Get Involved",
+      currentOpportunities: "Current Opportunities",
+      mediaLibrary: "Media Library",
     },
     cta: "Get Involved",
     allInitiatives: "All initiatives",
@@ -40,8 +44,8 @@ export const en = {
     contact: "Contact",
     questions: {
       title: "Have questions?",
-      body: "We are open to answer any of your questions",
-      cta: "Contact Us",
+      body: "Find answers to the questions we get asked most about how we work and how you can get involved.",
+      cta: "Frequently Asked Questions",
     },
   },
   home: {
@@ -57,6 +61,19 @@ export const en = {
       detail: "Detail",
       teamTitle: "Meet our team",
       teamBody: "The people who plan our festivals, competitions and school programs.",
+      heroBody:
+        "STEM Education Organisation for Cambodia (STEMEOC) is a non-governmental organisation that aims to expand access to hands-on STEM learning through programmes, competitions, community initiatives, and partnerships for students across Cambodia.",
+      storyBody:
+        "At STEM Education Organisation for Cambodia (STEMEOC), we believe in empowering students to unlock their full potential through hands-on learning and real-world applications of STEM knowledge. Through our programs, we aim for students to gain exposure to emerging technologies, leadership opportunities, and a supportive community that encourages their growth.",
+      nextTab: "Next tab",
+      programsTitle: "Programs",
+      programsBody: "Festivals, competitions and school programs that bring hands-on STEM to students across Cambodia.",
+      exploreAllPrograms: "Explore all programs",
+      opportunitiesTitle: "Current Opportunities",
+      opportunitiesBody: "Open registrations, calls for volunteers and other ways to take part right now.",
+      exploreOpportunities: "Explore more opportunities",
+      opportunityTag: "Event",
+      partnersTitle: "Our Partners and Sponsors",
     },
     hero: {
       titleLine1: "Shaping",
@@ -151,27 +168,67 @@ export const en = {
   about: {
     metaTitle: "About Us",
     hero: {
-      eyebrow: "About STEMEOC",
-      title: "About STEM EOC",
-      body: "Get to know who we are and what we do.",
+      title: "About STEMEOC",
+      body: "STEMEOC is the STEM Education Organization for Cambodia. We bring hands-on science, technology, engineering and math to young Cambodians through competitions, creative challenges and volunteer-led events, so every student can discover what they are able to build.",
     },
     story: {
-      eyebrow: "Our Story",
-      title: "A locally registered NGO cultivating a dynamic and passionate STEAM community in Cambodia.",
-      body: "At STEM Education Organisation for Cambodia (STEMEOC), we believe in empowering students to unlock their full potential through hands-on learning and real-world applications of STEM knowledge. Through our programs, we aim for students to gain exposure to emerging technologies, leadership opportunities, and a supportive community that encourages their growth.",
+      title: "Our Story",
+      body: "A locally registered NGO cultivating a dynamic and passionate STEM community in Cambodia, one festival, competition and classroom at a time.",
     },
+    timeline: [
+      {
+        year: "2024",
+        title: "Cambodia Robotics Olympiad",
+        body: "Students design and code robots for Robot Sumo, Robot Soccer and Robot Tug of War.",
+      },
+      {
+        year: "2025",
+        title: "ICIA Award",
+        body: "The International Creativity and Innovation Award takes students beyond the competition.",
+      },
+      {
+        year: "2026",
+        title: "Annual Cambodia STEM Festival",
+        body: "Students of all ages, up to university, showcase their projects to the public.",
+      },
+    ],
+    our: "Our",
     mission: {
-      eyebrow: "Mission",
+      label: "Mission",
       title:
         "To inspire and empower the Cambodian youth to pursue careers in STEM through engaging and inclusive education initiatives.",
+      body: "To make STEM learning accessible, exciting and meaningful for every young person in Cambodia, through hands-on programs and a strong community of volunteers and partners.",
     },
-    values: {
-      eyebrow: "Values",
-      title: "Our initiatives.",
+    vision: {
+      label: "Vision",
+      body: "A Cambodia where every student has the curiosity, skills and confidence to solve problems and shape the country’s future.",
+    },
+    childPolicy: "Child Protection Policy",
+    standFor: {
+      title: "What we stand for",
+      body: "Four ideas guide every festival, competition and workshop we run.",
+      items: [
+        {
+          title: "Curiosity and Discovery",
+          body: "We welcome questions, experiments and mistakes, because that is how discovery begins.",
+        },
+        {
+          title: "Learn and Challenge",
+          body: "Students build robots, take photos and test ideas, instead of only reading about them.",
+        },
+        {
+          title: "Open to everyone",
+          body: "Girls and boys, city and countryside. Every learner deserves a place in STEM.",
+        },
+        {
+          title: "Community and service",
+          body: "Volunteers, mentors and partners give their time and skills so others can grow.",
+        },
+      ],
     },
     team: {
-      eyebrow: "Our team",
-      title: "Meet the people driving the mission.",
+      eyebrow: "Our People",
+      title: "Meet the Team",
     },
   },
   apply: {
@@ -216,6 +273,125 @@ export const en = {
       message: "Message",
     },
   },
+  faq: {
+    metaTitle: "FAQs",
+    hero: {
+      badge: "FAQS",
+      title: "Frequently Asked Questions",
+      body: "Here are the mostly asked question to our organization",
+    },
+    title: "Frequently Asked Questions",
+    sections: [
+      {
+        id: "general",
+        title: "General",
+        items: [
+          {
+            q: "Is STEM Education Organization for Cambodia a school?",
+            a: "No. STEMEOC is a locally registered NGO. We run festivals, competitions and school programs that help Cambodian students learn and grow in STEM.",
+          },
+          {
+            q: "Does STEMEOC offer STEM classes for students?",
+            a: "We don’t run regular classes. We work with schools and partners on programs, workshops and competitions. Follow our news to see what is open now.",
+          },
+        ],
+      },
+      {
+        id: "students",
+        title: "Students",
+        items: [
+          {
+            q: "How old can students be to join the festival or competitions?",
+            a: "Each event and category has its own age range. See the event page for the rules, or send us a message below.",
+          },
+        ],
+      },
+      {
+        id: "event",
+        title: "Events",
+        items: [
+          {
+            q: "What are the differences between the Cambodia Robotic Olympiad and World Robotic Olympiad?",
+            a: "The Cambodia Robotic Olympiad (CRO) is our national competition. The World Robot Olympiad (WRO) is the international one, and top CRO teams can go on to represent Cambodia at WRO.",
+          },
+          {
+            q: "Is CRO/WRO Free to register?",
+            a: "Registration details change each season. Check the competition page or email us at info@stemcambodia.ngo for the current fees.",
+          },
+        ],
+      },
+      {
+        id: "get-involve",
+        title: "Get Involve",
+        items: [
+          {
+            q: "How can I become involved with STEM Education Organization for Cambodia as a volunteer or intern?",
+            a: "Visit our Apply page to see open volunteer and internship roles, or send us a message below.",
+          },
+          {
+            q: "Where can I look for sponsorship opportunities with STEM Education Organization?",
+            a: "Email info@stemcambodia.ngo or send us a message below with the topic “Sponsorship” and our team will share the current packages.",
+          },
+        ],
+      },
+    ],
+    items: [
+      {
+        q: "Is STEM Education Organization for Cambodia a school?",
+        a: "No. STEMEOC is a locally registered NGO. We run festivals, competitions and school programs that help Cambodian students learn and grow in STEM.",
+      },
+      {
+        q: "Does STEMEOC offer STEM classes for students?",
+        a: "We don’t run regular classes. We work with schools and partners on programs, workshops and competitions. Follow our news to see what is open now.",
+      },
+      {
+        q: "What are the differences between the Cambodia Robotic Olympiad and World Robotic Olympiad?",
+        a: "The Cambodia Robotic Olympiad (CRO) is our national competition. The World Robot Olympiad (WRO) is the international one, and top CRO teams can go on to represent Cambodia at WRO.",
+      },
+      {
+        q: "Is CRO/WRO Free to register?",
+        a: "Registration details change each season. Check the competition page or email us at info@stemcambodia.ngo for the current fees.",
+      },
+      {
+        q: "How old can students be to join the festival or competitions?",
+        a: "Each event and category has its own age range. See the event page for the rules, or send us a message below.",
+      },
+      {
+        q: "How can I become involved with STEM Education Organization for Cambodia as a volunteer or intern?",
+        a: "Visit our Apply page to see open volunteer and internship roles, or send us a message below.",
+      },
+      {
+        q: "Where can I look for sponsorship opportunities with STEM Education Organization?",
+        a: "Email info@stemcambodia.ngo or send us a message below with the topic “Sponsorship” and our team will share the current packages.",
+      },
+    ],
+    contact: {
+      title: "LEAVE US A MESSAGE!",
+      body: "If you have any more question regard on org or project, please fill out this form",
+      office: "Head Office",
+      officeValue: "#58, 5th Floor, Icon Building, 216 Norodom Blvd, Tonle Bassac, Chamkarmorn, 12301, Phnom Penh, Cambodia",
+      email: "Email Us",
+      phone: "Call Us",
+      follow: "Follow us Online",
+    },
+    form: {
+      firstName: "First Name",
+      lastName: "Last Name",
+      email: "Email Address",
+      topic: "Topic",
+      topicPlaceholder: "Select a topic...",
+      message: "Messages",
+      send: "Send",
+      sending: "Sending...",
+      topics: [
+        { value: "general", label: "General Inquiry" },
+        { value: "events", label: "Event & Festival" },
+        { value: "students", label: "Student Opportunities" },
+        { value: "volunteer", label: "Volunteer / Intern" },
+        { value: "sponsorship", label: "Sponsorship & Partnership" },
+      ],
+    },
+  },
   news: {
     metaTitle: "News",
     hero: {
@@ -234,6 +410,17 @@ export const en = {
     linkCopied: "Link copied",
     loadMore: "Load more",
     latest: "Latest",
+    badge: "News",
+    whatsNew: "What’s new?",
+    feature: "Feature",
+    latestNews: "Latest News",
+    previous: "Previous page",
+    next: "Next page",
+    page: "Page",
+    watch: "Watch",
+    videos: "Video footage/Interview",
+    sharePost: "Share this post",
+    moreFromCategory: "More from the category",
   },
   hallOfFame: {
     metaTitle: "Hall of Fame",
@@ -292,13 +479,24 @@ export const en = {
     latest: "Latest episode",
     episode: "Episode",
     episodes: "episodes",
+    badge: "Media Library",
+    title: "STEM Talk | Podcast",
+    moreEpisodes: "More Episodes",
+    page: "Page",
+    previous: "Previous page",
+    next: "Next page",
+    guest: {
+      title: "Join us as the next Speaker!",
+      body: "Reach out to us by email or through our social media channels to get involved.",
+      cta: "Be our next guest",
+    },
   },
   projects: {
     metaTitle: "Projects",
     hero: {
       eyebrow: "Projects",
-      title: "Events, Opportunities, and Programs organized by STEMEOC.",
-      body: "From national festivals to robotics competitions, these are the programs that bring hands-on STEM to students across Cambodia.",
+      title: "Our Programs and Events Organised by STEMEOC",
+      body: "From national programmes and competitions to community-based initiatives, STEMEOC facilitates a range of programmes and events designed to bring hands-on STEM learning opportunities to students across Cambodia.",
     },
     listTitle: "Our programs",
     backToPrograms: "← Back to Programs",
@@ -306,6 +504,7 @@ export const en = {
     photos: "Photos",
     preRegister: "Pre-register",
     register: "Register",
+    volunteer: "Volunteer",
     moreProjects: "More projects",
     aboutProgram: "About the program",
     events: "Events",
@@ -317,6 +516,26 @@ export const en = {
     winners: "Winners",
     winningTeams: "winning teams",
     venue: "Venue",
+    event: {
+      nextPhoto: "Show next photo",
+      back: "Back",
+      downloadReport: "Download full report",
+      participation: "Participation",
+      whoTookPart: "Who took part, by category",
+      winners: "Winners",
+      champions: "Meet our Champions",
+      highlight: "Highlight",
+      moments: "Moments from the Event.",
+      thanks: "Thank you to our partners and sponsors",
+    },
+    festival: {
+      aboutEvent: "About the event",
+      eventOverview: "Event Overview",
+      gallery: "Gallery",
+      watch: "Watch",
+      highlight: "Event Highlight",
+      previousEvents: "Previous Events",
+    },
     categories: {
       festival: "Festival",
       robotics: "Robotics",
@@ -331,6 +550,51 @@ export const en = {
     aboutMe: "About me",
     moreEyebrow: "Our team",
     moreTitle: "Meet more of the team.",
+  },
+  getInvolvedPage: {
+    metaTitle: "Get Involved",
+    hero: {
+      badge: "Get Involved",
+      title: "Your Support matters",
+      body: "Join us in empowering the next generation of Cambodian innovators by helping them unlock their full potential",
+    },
+    whyWorkWithUs: {
+      title: "Why work with us?",
+      points: [
+        "Contribute to uplifting STEM education in Cambodia",
+        "Provide youths with networking opportunities",
+        "Enhance your company's goals and vision through STEM-related initiatives",
+        "Build community trust and strengthen your branding impact",
+      ],
+    },
+    supportMatters: {
+      title: "Your support matters",
+      body: "As a non-profit, non-governmental, and independent organization, your support in any form enables us to achieve our mission and vision and continues to bring STEM education and student opportunities. It helps us to deliver programs every weekend/monthly across Cambodia and make lasting impact.",
+    },
+    howCanYouHelp: {
+      title: "How can you help",
+      subtitle:
+        "Shaping an innovative future requires collective effort and participation from people across all backgrounds, with each person playing key roles in nurturing and developing future engineers, innovators, and scientists. Through our shared visions and actions, STEM fields in Cambodia continue to move forward and prosper.",
+      cards: {
+        volunteer: {
+          title: "Volunteer",
+          desc: "Join our active team and make a direct difference in students' lives.",
+        },
+        partnership: {
+          title: "Partnership",
+          desc: "Work with us to scale our reach and create lasting STEM impact in Cambodia.",
+        },
+        internship: {
+          title: "Internship",
+          desc: "Gain professional experience and grow in STEM event management and youth development.",
+        },
+        sponsorship: {
+          title: "Sponsorship",
+          desc: "Support our annual festivals, student competitions, and community programs.",
+        },
+      },
+    },
+    partnersTitle: "Our Partners and Sponsors",
   },
 } as const;
 

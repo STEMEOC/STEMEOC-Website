@@ -4,7 +4,6 @@ import { motion, type Variants } from "motion/react";
 import type { ReactNode } from "react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-const SPRING = { type: "spring", stiffness: 140, damping: 20, mass: 0.9 } as const;
 
 /**
  * Scroll-triggered sequence for a block of content. Children using the
@@ -42,13 +41,12 @@ export function StaggerGroup({
 }
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 44, scale: 0.96, filter: "blur(6px)" },
+  hidden: { opacity: 0, y: 28, filter: "blur(10px)" },
   show: (wave: number = 0) => ({
     opacity: 1,
     y: 0,
-    scale: 1,
     filter: "blur(0px)",
-    transition: { ...SPRING, delay: wave * 0.07, filter: { duration: 0.5, ease: EASE, delay: wave * 0.07 } },
+    transition: { duration: 1, ease: [0.22, 1, 0.36, 1], delay: wave * 0.07 },
   }),
 };
 

@@ -11,7 +11,6 @@ import {
   Eye,
   ListChecks,
   PaintBrush,
-  LinkSimple,
   Copy,
   SpinnerGap,
   TextAa,
@@ -33,6 +32,14 @@ import {
 import { FieldInput } from "@/components/FormFieldInput";
 import { FormStyleFrame } from "@/components/FormStyleFrame";
 import { FORM_TEMPLATES, type FormTemplate } from "@/lib/formTemplates";
+
+// Matches the filter tabs on /apply
+const OPPORTUNITY_TYPES = [
+  { value: "event", label: "Event" },
+  { value: "workshop", label: "Workshop" },
+  { value: "volunteer", label: "Volunteer" },
+  { value: "internship", label: "Internship" },
+];
 
 const ACCENT_SWATCHES = [
   "#2c80c2",
@@ -128,12 +135,11 @@ function Switch({ on, onToggle, color, small = false }: { on: boolean; onToggle:
   );
 }
 
-function SaveButton({ disabled, pending, label }: { disabled: boolean; pending: boolean; label: string }) {
+function SaveButton({ pending, label }: { pending: boolean; label: string }) {
   return (
     <button
       type="submit"
-      disabled={disabled || pending}
-      title={disabled ? "Add at least one question first" : undefined}
+      disabled={pending}
       className="flex h-11 items-center gap-2 rounded-full bg-navy px-6 text-sm font-bold text-white transition-colors hover:bg-blue-deep disabled:opacity-50"
     >
       {pending ? <SpinnerGap size={16} weight="bold" className="animate-spin" /> : <Check size={16} weight="bold" />}
@@ -234,10 +240,13 @@ export function FormBuilder({
   const [title, setTitle] = useState(form?.title ?? tpl?.title ?? "");
   const [slug, setSlug] = useState(form?.slug ?? tpl?.slug ?? "");
   const [description, setDescription] = useState(form?.description ?? tpl?.formDescription ?? "");
+  const [category, setCategory] = useState(
+    OPPORTUNITY_TYPES.some((t) => t.value === form?.category) ? form!.category : (tpl?.category ?? "volunteer")
+  );
   const [mode, setMode] = useState<"questions" | "design">("questions");
   const [published, setPublished] = useState(form?.published ?? true);
   // New forms fill the link from the title until someone edits it by hand.
-  const [slugTouched, setSlugTouched] = useState(Boolean(form));
+  const slugTouched = Boolean(form);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saveState, saveAction, saving] = useActionState(action, {});
@@ -272,6 +281,7 @@ export function FormBuilder({
     setTitle(template.title);
     setSlug(template.slug);
     setDescription(template.formDescription);
+    if (template.category) setCategory(template.category);
     setAccentColor(template.accentColor);
     setLayout(template.layout);
     setTheme(template.theme);
@@ -438,7 +448,7 @@ export function FormBuilder({
               <Switch on={published} onToggle={() => setPublished((p) => !p)} color={accentColor} />
               {published ? "Accepting responses" : "Closed"}
             </label>
-            <SaveButton disabled={fields.length === 0} pending={saving} label={form ? "Save changes" : "Create form"} />
+            <SaveButton pending={saving} label={form ? "Save changes" : "Create opportunity"} />
           </div>
         </div>
         {shownError && (
@@ -449,7 +459,7 @@ export function FormBuilder({
       </div>
 
       {/* ---------------------------- Questions tab ---------------------------- */}
-      <div className={mode === "questions" ? "max-w-3xl space-y-4" : "hidden"}>
+      <div className={mode === "questions" ? "mx-auto max-w-3xl space-y-4" : "hidden"}>
         {!form && (
           <div className="flex flex-wrap items-center gap-2 pb-2">
             <span className="mr-1 text-sm font-semibold text-navy/50">Start from:</span>
@@ -502,25 +512,45 @@ export function FormBuilder({
               rows={2}
               className="w-full resize-y border-b-2 border-transparent bg-transparent pb-2 text-base text-navy/80 outline-none transition-colors placeholder:text-navy/35 hover:border-navy/10 focus:border-[var(--accent)]"
             />
-            <div className="flex flex-wrap items-center gap-2 rounded-xl bg-paper-dim px-4 py-3 text-sm">
-              <LinkSimple size={16} weight="bold" className="text-navy/40" />
-              <span className="text-navy/50">Form link:</span>
-              <span className="font-mono text-navy/50">/apply/</span>
-              <input
-                id="slug"
-                name="slug"
-                value={slug}
-                onChange={(e) => {
-                  setSlugTouched(true);
-                  setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"));
-                }}
-                placeholder="volunteer-application"
-                aria-label="Form link"
-                required
-                pattern="[a-z0-9]+(-[a-z0-9]+)*"
-                title="Lowercase letters, numbers and hyphens only"
-                className="min-w-40 flex-1 rounded-md bg-transparent px-1 font-mono text-navy outline-none focus:bg-white focus:ring-1 focus:ring-navy/20 user-invalid:text-red"
-              />
+            <input type="hidden" name="slug" value={slug} />
+
+            {/* Opportunity details: shown on the card at /apply */}
+            <div className="grid gap-4 border-t border-navy/10 pt-4 sm:grid-cols-3">
+              <label className="block text-sm font-semibold text-navy/70">
+                Type
+                <select
+                  name="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="mt-1.5 w-full rounded-lg border border-navy/15 bg-white px-3 py-2.5 text-base font-normal text-navy outline-none focus:border-[var(--accent)]"
+                >
+                  {OPPORTUNITY_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-sm font-semibold text-navy/70">
+                Location
+                <input
+                  name="location"
+                  defaultValue={form?.location ?? "Phnom Penh"}
+                  placeholder="e.g. Phnom Penh"
+                  maxLength={120}
+                  className="mt-1.5 w-full rounded-lg border border-navy/15 bg-white px-3 py-2.5 text-base font-normal text-navy outline-none placeholder:text-navy/35 focus:border-[var(--accent)]"
+                />
+              </label>
+              <label className="block text-sm font-semibold text-navy/70">
+                Deadline
+                <input
+                  name="deadline"
+                  defaultValue={form?.deadline && form.deadline !== "Rolling" ? form.deadline.replace(/^deadline:\s*/i, "") : ""}
+                  placeholder="e.g. 30 Nov · empty = rolling"
+                  maxLength={60}
+                  className="mt-1.5 w-full rounded-lg border border-navy/15 bg-white px-3 py-2.5 text-base font-normal text-navy outline-none placeholder:text-navy/35 focus:border-[var(--accent)]"
+                />
+              </label>
             </div>
           </div>
         </section>
@@ -528,7 +558,9 @@ export function FormBuilder({
         {fields.length === 0 && (
           <div className="rounded-2xl border-2 border-dashed border-navy/15 px-6 py-10 text-center">
             <p className="text-base font-semibold text-navy">No questions yet</p>
-            <p className="mt-1 text-sm text-navy/55">Pick a question type below to add your first one.</p>
+            <p className="mt-1 text-sm text-navy/55">
+              Events and internships can go without one. Pick a question type below to add a form.
+            </p>
           </div>
         )}
 

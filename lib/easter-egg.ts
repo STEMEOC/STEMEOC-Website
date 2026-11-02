@@ -22,6 +22,6 @@ export const EASTER_EGGS: Record<string, EasterEgg> = {
     artist: "Daniel Caesar",
     geniusSongId: 8802324,
     geniusUrl: "https://genius.com/Daniel-caesar-let-me-go-lyrics",
-    revealPhoto: "/uploads/team/te-henglay-reveal.jpg",
+    revealPhoto: "/uploads/team/te-henglay-reveal.webp",
   },
 };

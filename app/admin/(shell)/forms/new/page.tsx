@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { createForm } from "@/lib/actions/forms";
 import { FORM_TEMPLATES } from "@/lib/formTemplates";
 
-export const metadata: Metadata = { title: "New Form" };
+export const metadata: Metadata = { title: "New Opportunity" };
 
 export default async function NewFormPage({ searchParams }: PageProps<"/admin/forms/new">) {
   const { template } = await searchParams;
@@ -12,7 +12,7 @@ export default async function NewFormPage({ searchParams }: PageProps<"/admin/fo
 
   return (
     <div>
-      <PageHeader eyebrow="Content" title="New Form" description="Pick a template or start from a blank form." />
+      <PageHeader eyebrow="Content" title="New Opportunity" description="Set the type, location and deadline, then add the questions people answer to apply." />
       <div className="mt-8">
         <FormBuilder action={createForm} initialTemplate={initialTemplate} />
       </div>

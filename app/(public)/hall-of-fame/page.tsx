@@ -23,7 +23,7 @@ export default async function HallOfFamePage() {
   return (
     <PageTransition>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-navy text-white">
+      <section className="relative -mt-(--header-h) overflow-hidden bg-navy pt-(--header-h) text-white">
         <StaggerGroup className="container-site relative flex flex-col items-center pb-12 pt-14 text-center md:pb-14 md:pt-20">
           <PopIn className="flex size-16 items-center justify-center rounded-full bg-orange text-navy shadow-[0_12px_30px_-10px_rgb(244_148_35/0.8)] md:size-20">
             <Trophy weight="fill" className="size-8 md:size-10" />
@@ -105,7 +105,7 @@ export default async function HallOfFamePage() {
         title={dict.footer.questions.title}
         body={dict.footer.questions.body}
         cta={dict.footer.questions.cta}
-        href="/contact"
+        href="/faq"
       />
     </PageTransition>
   );

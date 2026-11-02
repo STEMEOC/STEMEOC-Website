@@ -12,7 +12,7 @@ import type { Icon } from "@phosphor-icons/react";
 import type { CategoryIcon, ProgramCategory, ProgramPage } from "@/lib/program-pages";
 import { Reveal } from "@/components/motion/Reveal";
 
-const CATEGORY_ICONS: Record<CategoryIcon, Icon> = {
+export const CATEGORY_ICONS: Record<CategoryIcon, Icon> = {
   tug: ArrowsLeftRight,
   sumo: Target,
   soccer: SoccerBall,

@@ -1,6 +1,8 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { IntroCurtain } from "@/components/motion/IntroCurtain";
+import { ClickSparks } from "@/components/interactive/ClickSparks";
+import { SmoothScroll } from "@/components/motion/SmoothScroll";
 
 // Runs before first paint: if the intro already played this session, hide the
 // server-rendered curtain so repeat loads never flash the brand colors.
@@ -11,9 +13,11 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <script dangerouslySetInnerHTML={{ __html: introGate }} />
+      <SmoothScroll />
       <IntroCurtain />
+      <ClickSparks />
       <Header />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 overflow-x-clip">{children}</main>
       <Footer />
     </>
   );

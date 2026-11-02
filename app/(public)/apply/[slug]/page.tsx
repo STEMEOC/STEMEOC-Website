@@ -21,7 +21,7 @@ export default async function ApplyFormPage({ params }: PageProps<"/apply/[slug]
 
   return (
     <PageTransition>
-      <section className="bg-paper py-20">
+      <section className="-mt-(--header-h) bg-paper pb-20 pt-[calc(var(--header-h)+3rem)] md:pt-[calc(var(--header-h)+5rem)]">
         <div className="mx-auto max-w-2xl px-6">
           <Reveal>
             {form.published ? (

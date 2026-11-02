@@ -13,9 +13,14 @@ import { AboutTabs } from "@/components/AboutTabs";
 import { ProjectsBand } from "@/components/ProjectsBand";
 import { ProgramCategories, externalProps } from "@/components/ProgramCategories";
 import { EventCards } from "@/components/EventCards";
+import { ProgramLanding } from "@/components/ProgramLanding";
+import { EcoLanding } from "@/components/EcoLanding";
 
 const pillButton =
   "inline-flex h-12 items-center justify-center rounded-3xl border-[3px] border-white px-7 font-body text-sm font-bold uppercase press md:h-13 md:min-w-48 md:text-base";
+
+// Programs already moved to the new Figma landing layout.
+const LANDING_SLUGS = new Set(["annual-stem-festivals", "cambodia-robotics-olympiad"]);
 
 function paragraphs(text: string) {
   return text
@@ -118,10 +123,34 @@ export default async function ProgramPage({ params }: PageProps<"/projects/[slug
     </section>
   );
 
+  if (slug === "eco-stem" && page) {
+    return (
+      <PageTransition>
+        <EcoLanding program={program} page={page} others={others} dict={dict} />
+      </PageTransition>
+    );
+  }
+
+  if (LANDING_SLUGS.has(slug) && page) {
+    return (
+      <PageTransition>
+        <ProgramLanding
+          program={program}
+          page={page}
+          logo={logo}
+          logoMono={programLogoIsMonochrome(program)}
+          others={others}
+          gallery={gallery}
+          dict={dict}
+        />
+      </PageTransition>
+    );
+  }
+
   return (
     <PageTransition>
       {/* Hero */}
-      <section className="bg-navy text-white">
+      <section className="-mt-(--header-h) bg-navy pt-(--header-h) text-white">
         <div className="container-site grid items-center gap-10 pb-12 pt-14 md:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:pb-16 lg:pt-24">
           <Reveal>
             <h1 className="max-w-2xl font-display text-3xl font-bold uppercase leading-tight md:text-5xl xl:text-6xl">

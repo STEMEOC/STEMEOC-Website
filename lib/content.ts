@@ -94,6 +94,7 @@ export function getPublishedForms() {
       prisma.form.findMany({
         where: { published: true },
         orderBy: { createdAt: "desc" },
+        include: { _count: { select: { fields: { where: { archivedAt: null } } } } },
       }),
     ["forms"]
   );

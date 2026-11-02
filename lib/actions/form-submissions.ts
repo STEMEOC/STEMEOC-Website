@@ -66,7 +66,7 @@ export async function submitFormResponse(
     include: { fields: { where: { archivedAt: null }, orderBy: { order: "asc" } } },
   });
 
-  if (!form || !form.published) {
+  if (!form || !form.published || form.fields.length === 0) {
     return { status: "error", message: "This form is no longer accepting responses." };
   }
 

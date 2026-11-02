@@ -47,7 +47,7 @@ export default async function ContactPage() {
   return (
     <PageTransition>
       {/* Hero: dark navy backdrop matching the rest of the site */}
-      <section className="relative overflow-hidden bg-[#0b1f3d]">
+      <section className="relative -mt-(--header-h) overflow-hidden bg-[#0b1f3d] pt-(--header-h)">
         <div className="pointer-events-none absolute -right-1/4 top-[-45%] h-[140%] w-[150%] rotate-[-6deg] rounded-[45%] bg-[#123162]" />
         <div className="pointer-events-none absolute -right-1/3 top-[-55%] h-[140%] w-[160%] rotate-[-4deg] rounded-[45%] bg-[#0e2750]" />
 

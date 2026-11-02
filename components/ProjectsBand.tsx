@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { programLogo } from "@/lib/brand";
+import { TiltCard } from "@/components/interactive/TiltCard";
 
 type Program = { id: string; slug: string; title: string; coverImageUrl: string | null };
 
@@ -35,28 +36,30 @@ export function ProjectsBand({
             const src = logo ?? program.coverImageUrl;
             return (
               <li key={program.id} className="w-72 shrink-0 snap-start md:w-[22rem]">
-                <Link
-                  href={`/projects/${program.slug}`}
-                  className="group relative block transition-[scale] duration-150 active:scale-[0.98]" aria-label={program.title}>
-                  <div className="card-notch relative aspect-[405/331] bg-white transition-transform duration-300 group-hover:-translate-y-1">
-                    {src ? (
-                      <Image
-                        src={src}
-                        alt=""
-                        fill
-                        className={logo ? "object-contain p-8 pb-14 md:p-10 md:pb-16" : "object-cover"}
-                        sizes="352px"
-                      />
-                    ) : (
-                      <span className="absolute inset-0 flex items-center justify-center p-8 pb-14 text-center font-display text-2xl font-bold text-navy">
-                        {program.title}
-                      </span>
-                    )}
-                  </div>
-                  <span className="absolute bottom-[0.5%] right-[1.5%] flex h-[10%] w-[28%] items-center justify-center rounded-full border border-white text-xs font-bold uppercase text-white transition-[color,background-color,translate] duration-300 group-hover:-translate-y-1 group-hover:bg-white group-hover:text-navy md:text-sm">
-                    {detailLabel}
-                  </span>
-                </Link>
+                <TiltCard max={7} glare={false}>
+                  <Link
+                    href={`/projects/${program.slug}`}
+                    className="group relative block transition-[scale] duration-150 active:scale-[0.98]" aria-label={program.title}>
+                    <div className="card-notch relative aspect-[405/331] bg-white transition-transform duration-300 group-hover:-translate-y-1">
+                      {src ? (
+                        <Image
+                          src={src}
+                          alt=""
+                          fill
+                          className={logo ? "object-contain p-8 pb-14 md:p-10 md:pb-16" : "object-cover"}
+                          sizes="352px"
+                        />
+                      ) : (
+                        <span className="absolute inset-0 flex items-center justify-center p-8 pb-14 text-center font-display text-2xl font-bold text-navy">
+                          {program.title}
+                        </span>
+                      )}
+                    </div>
+                    <span className="absolute bottom-[0.5%] right-[1.5%] flex h-[10%] w-[28%] items-center justify-center rounded-full border border-white text-xs font-bold uppercase text-white transition-[color,background-color,translate] duration-300 group-hover:-translate-y-1 group-hover:bg-white group-hover:text-navy md:text-sm">
+                      {detailLabel}
+                    </span>
+                  </Link>
+                </TiltCard>
               </li>
             );
           })}

@@ -2,17 +2,26 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, CalendarBlank, MapPin } from "@phosphor-icons/react/dist/ssr";
-import { getProgramBySlug } from "@/lib/content";
+import { ArrowLeft, CalendarBlank, DownloadSimple, MapPin } from "@phosphor-icons/react/dist/ssr";
+import { getProgramBySlug, getPrograms } from "@/lib/content";
 import { getDictionary } from "@/lib/i18n";
-import { programLogo, programLogoIsMonochrome } from "@/lib/brand";
+import { PARTNERS, programLogo } from "@/lib/brand";
 import { PROGRAM_PAGES, getProgramEvent } from "@/lib/program-pages";
 import { PageTransition } from "@/components/motion/PageTransition";
 import { Reveal } from "@/components/motion/Reveal";
-import { StatCounter } from "@/components/motion/StatCounter";
-import { ProgramCategories } from "@/components/ProgramCategories";
-import { EventCards } from "@/components/EventCards";
-import { EventWinners } from "@/components/EventWinners";
+import { StatBoxes } from "@/components/StatBoxes";
+import { PastEvents } from "@/components/PastEvents";
+import { ChampionTabs } from "@/components/ChampionTabs";
+import { PhotoStack } from "@/components/PhotoStack";
+import { YouTubePlayer } from "@/components/YouTubePlayer";
+import { PartnerLogos } from "@/components/PartnerLogos";
+import { ProjectsBand } from "@/components/ProjectsBand";
+import { QuestionsBand } from "@/components/QuestionsBand";
+
+const ACCENTS = {
+  blue: { bg: "bg-blue", text: "text-blue" },
+  red: { bg: "bg-red", text: "text-red" },
+};
 
 export async function generateMetadata({ params }: PageProps<"/projects/[slug]/[event]">): Promise<Metadata> {
   const { slug, event: eventSlug } = await params;
@@ -21,190 +30,223 @@ export async function generateMetadata({ params }: PageProps<"/projects/[slug]/[
   return { title: event.title, description: event.summary };
 }
 
-// One edition of a program (CRO 2025, the 18th STEM Festival...). Content
-// lives in lib/program-pages.ts next to the program it belongs to.
+// One edition of a program (CRO 2026, the 18th STEM Festival...), laid out
+// like the "Annual Report landing page" frame in Figma. Content lives in
+// lib/program-pages.ts; sections without data are left out.
 export default async function ProgramEventPage({ params }: PageProps<"/projects/[slug]/[event]">) {
   const { slug, event: eventSlug } = await params;
   const page = PROGRAM_PAGES[slug];
   const event = getProgramEvent(slug, eventSlug);
   if (!page || !event) notFound();
 
-  const [program, { dict }] = await Promise.all([getProgramBySlug(slug), getDictionary()]);
+  const [program, programs, { dict }] = await Promise.all([getProgramBySlug(slug), getPrograms(), getDictionary()]);
   if (!program) notFound();
 
   const t = dict.projects;
+  const e = t.event;
+  const accent = ACCENTS[page.accent ?? "blue"];
   const logo = programLogo(program);
-  const programTitle = page.heroTitle ?? program.title;
-  const others = (page.events ?? []).filter((e) => e.slug !== event.slug);
-  // The hero already shows the main image; don't repeat it below.
-  const allPhotos = (event.photos ?? []).filter((p) => p.src !== event.image);
-  // Up to three real photos (not posters) sit under the overview text. An
-  // edition with none of its own borrows its award-ceremony photos, which the
-  // winners section below then leaves out so nothing shows twice.
-  const ownPhotos = allPhotos.filter((p) => !p.contain);
-  const overviewPhotos = (ownPhotos.length > 0 ? ownPhotos : (event.winners?.photos ?? [])).slice(0, 3);
-  const shown = new Set(overviewPhotos.map((p) => p.src));
-  const winners = event.winners && { ...event.winners, photos: event.winners.photos?.filter((p) => !shown.has(p.src)) };
-  const categoryImages = Object.fromEntries(
-    page.sections.flatMap((s) => s.categories).flatMap((c) => (c.image ? [[c.name.toLowerCase(), c.image]] : [])),
-  );
+  const others = (page.events ?? []).filter((x) => x.slug !== event.slug);
   const body = event.body ?? [event.summary];
+  // Real photos (not posters), falling back to the award-ceremony ones.
+  const photos = [...(event.photos ?? []), ...(event.winners?.photos ?? [])].filter(
+    (p) => !p.contain && p.src !== event.image,
+  );
+  const stackPhotos = photos.slice(0, 3);
+  const sidePhotos = photos.slice(3, 6);
+  const maxCount = Math.max(...(event.participation ?? []).map((p) => p.count), 1);
 
   return (
     <PageTransition>
       {/* Hero */}
-      <section className="bg-navy text-white">
-        <div className="container-site grid items-center gap-10 pb-14 pt-10 md:pt-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:pb-20">
+      <section className="-mt-(--header-h) bg-navy pt-(--header-h) text-white">
+        <div className="container-site grid items-center gap-10 pb-24 pt-10 md:pb-28 md:pt-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
           <Reveal>
             <Link
               href={`/projects/${slug}`}
               className="group inline-flex items-center gap-2 text-sm font-semibold text-white/75 transition-colors hover:text-white"
             >
               <ArrowLeft size={16} weight="bold" className="transition-transform duration-300 group-hover:-translate-x-1" />
-              {t.backTo} {programTitle}
+              {e.back}
             </Link>
-            <h1 className="mt-6 max-w-2xl font-display text-3xl font-bold uppercase leading-tight md:text-5xl">
-              {event.title}
-            </h1>
-            <ul className="mt-6 flex flex-wrap gap-2.5 text-sm font-semibold">
-              <li className="inline-flex items-center gap-2 rounded-full border border-white/40 px-4 py-1.5">
-                <CalendarBlank size={16} weight="bold" />
-                {event.date}
-              </li>
-              {event.venue && (
-                <li className="inline-flex items-center gap-2 rounded-full border border-white/40 px-4 py-1.5">
-                  <MapPin size={16} weight="bold" />
-                  {event.venue}
-                </li>
-              )}
-            </ul>
+            <h1 className="mt-6 max-w-2xl font-display text-3xl font-bold uppercase leading-tight md:text-5xl">{event.title}</h1>
             <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/90 md:text-lg">{event.summary}</p>
+            {event.reportUrl && (
+              <a
+                href={event.reportUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-8 inline-flex h-11 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-navy press hover:-translate-y-0.5 hover:bg-paper"
+              >
+                <DownloadSimple size={18} weight="bold" />
+                {e.downloadReport}
+              </a>
+            )}
           </Reveal>
-          <Reveal delay={0.15} className="flex justify-center lg:justify-end">
-            {event.image ? (
+          {(event.image ?? logo) && (
+            <Reveal delay={0.15} className="flex justify-center lg:justify-end">
               <div
-                className={`relative w-full max-w-xl overflow-hidden rounded-[1.875rem] ${
-                  event.imageContain ? "aspect-square max-w-xs md:max-w-md" : "aspect-[4/3] bg-white/5"
+                className={`relative w-full overflow-hidden rounded-2xl bg-white ${
+                  event.image && !event.imageContain ? "aspect-[4/3] max-w-xl" : "aspect-[4/3] max-w-md"
                 }`}
               >
                 <Image
-                  src={event.image}
+                  src={event.image ?? logo!}
                   alt=""
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 560px"
-                  className={event.imageContain ? "object-contain" : "object-cover"}
+                  className={event.image && !event.imageContain ? "object-cover" : "object-contain p-3"}
                 />
               </div>
-            ) : (
-              logo && (
-                <Image
-                  src={logo}
-                  alt={program.title}
-                  width={900}
-                  height={400}
-                  priority
-                  className={`h-auto max-h-64 w-full max-w-md object-contain ${
-                    programLogoIsMonochrome(program) ? "brightness-0 invert" : ""
-                  }`}
-                />
-              )
-            )}
-          </Reveal>
+            </Reveal>
+          )}
         </div>
       </section>
 
-      {/* Story + key facts */}
-      <section className="container-site grid gap-12 py-16 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-20 lg:py-24">
+      {/* Key numbers, pulled up over the hero */}
+      {event.stats && event.stats.length > 0 && (
+        <div className="container-site relative z-10 -mt-14">
+          <StatBoxes stats={event.stats} className="[&>div]:shadow-[0_18px_40px_-28px_rgb(5_19_59/0.55)]" />
+        </div>
+      )}
+
+      {/* Overview */}
+      <section className="container-site grid items-center gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20 lg:py-24">
         <Reveal>
-          <h2 className="font-display text-3xl font-bold md:text-4xl">{t.overview}</h2>
-          <div className="mt-6 space-y-5 text-base leading-relaxed md:text-lg">
+          <p className={`text-sm font-semibold md:text-base ${accent.text}`}>{t.festival.aboutEvent}</p>
+          <h2 className="mt-2 font-display text-3xl font-bold md:text-4xl">{t.overview}</h2>
+          <ul className="mt-5 flex flex-wrap gap-2 text-xs font-semibold md:text-sm">
+            <li className="inline-flex items-center gap-1.5 rounded-full border border-navy/20 px-3 py-1">
+              <CalendarBlank size={14} weight="bold" className={accent.text} />
+              {event.date}
+            </li>
+            {event.venue && (
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-navy/20 px-3 py-1">
+                <MapPin size={14} weight="bold" className="text-green" />
+                {event.venue}
+              </li>
+            )}
+          </ul>
+          <div className="mt-6 space-y-4 text-base leading-relaxed md:text-justify md:text-lg">
             {body.map((p, i) => (
               <p key={i}>{p}</p>
             ))}
           </div>
-          {overviewPhotos.length > 0 && (
-            <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4">
-              {overviewPhotos.map((photo, i) => (
-                <li key={photo.src} className={i === 2 ? "col-span-2 sm:col-span-1" : ""}>
-                  <div className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-placeholder">
-                    <Image
-                      src={photo.src}
-                      alt={photo.alt}
-                      fill
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
-                      className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-          {event.stats && event.stats.length > 0 && (
-            <dl className="mt-12 grid grid-cols-2 gap-6 border-t border-navy/15 pt-10 sm:grid-cols-3">
-              {event.stats.map((stat) => (
-                <div key={stat.label} className="flex flex-col-reverse">
-                  <dt className="mt-2 text-sm font-light md:text-base">{stat.label}</dt>
-                  <dd className="font-body text-4xl font-extrabold md:text-5xl">
-                    <StatCounter value={stat.value} />
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          )}
         </Reveal>
+        {stackPhotos.length > 0 && (
+          <Reveal delay={0.1}>
+            <PhotoStack photos={stackPhotos} label={e.nextPhoto} />
+          </Reveal>
+        )}
+      </section>
 
-        <Reveal delay={0.1}>
-          <aside className="rounded-2xl bg-navy p-6 text-white md:p-8 lg:sticky lg:top-32">
-            <dl className="space-y-5">
-              <div>
-                <dt className="text-xs font-bold uppercase tracking-wide text-white/60">{t.date}</dt>
-                <dd className="mt-1 text-lg font-semibold">{event.date}</dd>
-              </div>
-              {event.venue && (
-                <div>
-                  <dt className="text-xs font-bold uppercase tracking-wide text-white/60">{t.venue}</dt>
-                  <dd className="mt-1 text-lg font-semibold">{event.venue}</dd>
+      {/* Participation */}
+      {event.participation && event.participation.length > 0 && (
+        <section className="container-site pb-16 md:pb-24">
+          <Reveal>
+            <p className={`text-sm font-semibold md:text-base ${accent.text}`}>{e.participation}</p>
+            <h2 className="mt-2 font-display text-3xl font-bold md:text-4xl">{e.whoTookPart}</h2>
+          </Reveal>
+          <dl className="mt-10 max-w-4xl space-y-5">
+            {event.participation.map((row, i) => (
+              <Reveal key={row.category} scroll={i * 0.06} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-4 md:grid-cols-[12rem_1fr_3rem]">
+                <dt className="text-sm md:text-base">{row.category}</dt>
+                <dd className="h-3 overflow-hidden rounded-full bg-navy/10">
+                  <span className="block h-full rounded-full bg-navy" style={{ width: `${(row.count / maxCount) * 100}%` }} />
+                </dd>
+                <dd className="text-right font-bold">{row.count}</dd>
+              </Reveal>
+            ))}
+          </dl>
+        </section>
+      )}
+
+      {/* Champions */}
+      {event.winners && (
+        <section className="bg-paper py-16 md:mx-6 md:py-24 lg:mx-10">
+          <div className="container-site">
+            <Reveal className="mb-10 text-center">
+              <p className="text-sm font-semibold text-red md:text-base">{e.winners}</p>
+              <h2 className="mt-1 font-display text-3xl font-bold md:text-4xl">{e.champions}</h2>
+            </Reveal>
+            <ChampionTabs groups={event.winners.groups} />
+          </div>
+        </section>
+      )}
+      {event.winners?.intro && (
+        <Reveal className="container-site pt-12">
+          <p className="mx-auto max-w-2xl rounded-2xl border-2 border-red px-6 py-4 text-center text-sm font-medium md:text-base">
+            {event.winners.intro}
+          </p>
+        </Reveal>
+      )}
+
+      {/* Moments */}
+      {(event.video || sidePhotos.length > 0) && (
+        <section className="container-site py-16 md:py-24">
+          <Reveal className="mb-10 text-center md:mb-14">
+            <p className="text-sm font-semibold text-red md:text-base">{e.highlight}</p>
+            <h2 className="mt-1 font-display text-3xl font-bold md:text-4xl">{e.moments}</h2>
+          </Reveal>
+          <div className={`grid gap-6 ${event.video && sidePhotos.length > 0 ? "lg:grid-cols-[3fr_1fr]" : ""}`}>
+            {event.video && (
+              <Reveal>
+                <div className="relative pb-3 pl-3">
+                  <span aria-hidden className={`absolute inset-0 right-3 top-3 rounded-2xl ${accent.bg}`} />
+                  <div className="relative">
+                    <YouTubePlayer videoId={event.video} title={event.title} sizes="(max-width: 1024px) 100vw, 900px" />
+                  </div>
                 </div>
-              )}
-            </dl>
-            {event.highlights && event.highlights.length > 0 && (
-              <ul className="mt-6 space-y-3 border-t border-white/20 pt-6 text-sm leading-relaxed md:text-base">
-                {event.highlights.map((h) => (
-                  <li key={h} className="flex gap-3">
-                    <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-white/70" />
-                    {h}
+                <p className="mt-4 font-bold">{event.title}</p>
+              </Reveal>
+            )}
+            {sidePhotos.length > 0 && (
+              <ul className={`grid gap-4 ${event.video ? "grid-cols-3 lg:grid-cols-1 lg:content-start" : "sm:grid-cols-3"}`}>
+                {sidePhotos.map((photo, i) => (
+                  <li key={photo.src}>
+                    <Reveal scroll={i * 0.1}>
+                      <div className="group relative aspect-video overflow-hidden rounded-xl bg-placeholder">
+                        <Image
+                          src={photo.src}
+                          alt={photo.alt}
+                          fill
+                          sizes="(max-width: 1024px) 33vw, 300px"
+                          className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                      </div>
+                    </Reveal>
                   </li>
                 ))}
               </ul>
             )}
-          </aside>
+          </div>
+        </section>
+      )}
+
+      {/* Partners */}
+      <section className="container-site pb-16 md:pb-24">
+        <Reveal>
+          <h2 className="mb-10 text-center text-base font-semibold text-navy/70 md:mb-12 md:text-lg">{e.thanks}</h2>
+          <PartnerLogos partners={PARTNERS} />
         </Reveal>
       </section>
 
-      {winners && (
-        <EventWinners
-          winners={winners}
-          title={t.winners}
-          teamsLabel={t.winningTeams}
-          categoryImages={categoryImages}
-        />
-      )}
+      <PastEvents programSlug={slug} events={others} title={t.festival.previousEvents} logo={logo} />
 
-      {event.showCategories && (
-        <ProgramCategories
-          sections={page.sections}
-          labels={{ learnMore: dict.common.learnMore, register: t.register }}
-          hideLearnMore
+      <div className="pt-8">
+        <ProjectsBand
+          title={t.moreProjects}
+          detailLabel={dict.home.landing.detail}
+          programs={programs.filter((p) => p.id !== program.id)}
         />
-      )}
+      </div>
 
-      <EventCards
-        programSlug={slug}
-        events={others}
-        title={t.moreEvents}
-        viewLabel={t.viewEvent}
-        logo={logo}
+      <QuestionsBand
+        title={dict.footer.questions.title}
+        body={dict.footer.questions.body}
+        cta={dict.footer.questions.cta}
+        href="/faq"
       />
     </PageTransition>
   );

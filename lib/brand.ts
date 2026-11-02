@@ -5,6 +5,7 @@ const PROGRAM_LOGOS: { match: RegExp; src: string; monochrome?: boolean }[] = [
   { match: /icia/i, src: "/brand/icia-logo.png" },
   { match: /eco/i, src: "/brand/eco-stem-logo.png" },
   { match: /wro/i, src: "/brand/wro-logo.png" },
+  { match: /sister/i, src: "/brand/stem-sisters-logo.png" },
 ];
 
 function findLogo(program: { slug: string; title: string }) {
@@ -50,3 +51,15 @@ export function schoolLogo(school: string | undefined): string | null {
   if (!school) return null;
   return SCHOOL_LOGOS.find((l) => l.match.test(school))?.src ?? null;
 }
+
+// The partners table still holds seed placeholders, so the logo row uses
+// the logos from the Figma design in /public/uploads/partners/home.
+export const PARTNERS = [
+  { name: "American University of Phnom Penh", logoUrl: "/uploads/partners/home/aupp.webp" },
+  { name: "Paragon International School", logoUrl: "/uploads/partners/home/paragon.webp" },
+  { name: "Ministry of Education, Youth and Sport", logoUrl: "/uploads/partners/home/moeys.webp" },
+  { name: "Ministry of Industry, Science, Technology & Innovation", logoUrl: "/uploads/partners/home/misti.webp" },
+  { name: "Ministry of Environment", logoUrl: "/uploads/partners/home/moe.webp" },
+  { name: "AEON Mall Mean Chey", logoUrl: "/uploads/partners/home/aeon-mall.webp" },
+  { name: "Cambodia STEM Compass", logoUrl: "/uploads/partners/home/stem-compass.webp" },
+];

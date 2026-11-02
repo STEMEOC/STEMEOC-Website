@@ -250,7 +250,7 @@ export function HeaderNav({ locale, links, labels }: HeaderNavProps) {
               href={link.href}
               {...externalProps(link)}
               aria-current={!link.external && isActive(link.href) ? "page" : undefined}
-              className={`link-underline px-6 text-base leading-7 first:pl-0 not-first:border-l not-first:border-white hover:text-white/75 ${
+              className={`link-underline px-3.5 xl:px-5 2xl:px-6 text-sm xl:text-base leading-7 whitespace-nowrap first:pl-0 not-first:border-l not-first:border-navy/40 hover:text-navy/70 ${
                 !link.external && isActive(link.href) ? "font-bold" : "font-medium"
               }`}
             >
@@ -273,8 +273,8 @@ export function HeaderNav({ locale, links, labels }: HeaderNavProps) {
           }}
           className={`absolute right-0 top-1/2 z-10 flex h-11 -translate-y-1/2 items-center overflow-hidden rounded-full transition-[width,background-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             searchOpen
-              ? "w-[calc(100vw-10rem)] bg-white text-navy shadow-[0_12px_32px_-12px_rgb(0_0_0/0.6)] sm:w-80 lg:w-full lg:min-w-80"
-              : "w-11 bg-transparent text-white"
+              ? "w-[calc(100vw-10rem)] bg-paper text-navy sm:w-80 lg:w-full lg:min-w-80"
+              : "w-11 bg-transparent text-navy"
           }`}
         >
           <button
@@ -283,7 +283,7 @@ export function HeaderNav({ locale, links, labels }: HeaderNavProps) {
             aria-label={labels.search}
             aria-expanded={searchOpen}
             className={`group press flex size-11 shrink-0 items-center justify-center rounded-full ${
-              searchOpen ? "hover:bg-navy/5" : "hover:bg-white/10"
+              "hover:bg-navy/5"
             }`}
           >
             <MagnifyingGlass
@@ -347,7 +347,7 @@ export function HeaderNav({ locale, links, labels }: HeaderNavProps) {
           ) : suggestionList.length === 0 ? (
             <p className="px-5 py-4 text-sm text-navy/60">{labels.noSuggestions}</p>
           ) : (
-            <ul className="max-h-[min(26rem,60vh)] overflow-y-auto py-2">
+            <ul data-lenis-prevent className="max-h-[min(26rem,60vh)] overflow-y-auto py-2">
               {suggestionList.map((item, i) => {
                 const { icon: TypeIcon, color } = TYPE_ICONS[item.type];
                 const active = i === activeIndex;
@@ -433,7 +433,7 @@ export function HeaderNav({ locale, links, labels }: HeaderNavProps) {
           aria-controls={`${ids}-language`}
           aria-label={labels.language}
           aria-busy={pending}
-          className="group press flex size-10 items-center justify-center rounded-full hover:bg-white/10"
+          className="group press flex size-10 items-center justify-center rounded-full hover:bg-navy/5"
         >
           <Globe
             size={28}
@@ -470,7 +470,7 @@ export function HeaderNav({ locale, links, labels }: HeaderNavProps) {
         aria-expanded={menu === "mobile"}
         aria-controls={`${ids}-mobile`}
         aria-label={menu === "mobile" ? labels.closeMenu : labels.openMenu}
-        className="press flex size-10 items-center justify-center rounded-full hover:bg-white/10 lg:hidden"
+        className="press flex size-10 items-center justify-center rounded-full hover:bg-navy/5 lg:hidden"
       >
         {menu === "mobile" ? (
           <X key="close" size={26} weight="bold" className="animate-icon-swap" />
@@ -482,8 +482,9 @@ export function HeaderNav({ locale, links, labels }: HeaderNavProps) {
       {menu === "mobile" && (
         <nav
           id={`${ids}-mobile`}
+          data-lenis-prevent
           aria-label="Main"
-          className="animate-pop-in absolute inset-x-0 top-full max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-white/20 bg-navy px-6 pb-8 pt-4 shadow-xl lg:hidden"
+          className="animate-pop-in absolute inset-x-(--gutter) top-full mt-2 max-h-[calc(100dvh-7rem)] overflow-y-auto rounded-3xl bg-navy px-6 pb-8 pt-4 text-white shadow-xl lg:hidden"
         >
           <ul>
             {links.map((link, i) => (

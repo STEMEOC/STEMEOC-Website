@@ -60,6 +60,7 @@ export function GeniusLyrics({
         ref={box}
         onWheel={hold}
         onTouchMove={hold}
+        data-lenis-prevent
         tabIndex={0}
         aria-label={`Lyrics for ${title} by ${artist}`}
         className="h-72 overflow-y-auto overscroll-contain py-10 [mask-image:linear-gradient(transparent,black_15%,black_80%,transparent)] [scrollbar-width:none] focus-visible:outline-none lg:h-80 [&::-webkit-scrollbar]:hidden"

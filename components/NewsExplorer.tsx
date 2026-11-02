@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, Check, ShareNetwork } from "@phosphor-icons/react";
+import { CalendarBlank, Check, ShareNetwork } from "@phosphor-icons/react";
 import { Reveal } from "@/components/motion/Reveal";
+import { Pagination } from "@/components/Pagination";
 import type { Dictionary } from "@/lib/i18n";
 
 type NewsPost = {
@@ -19,8 +20,10 @@ type NewsPost = {
 };
 
 const PAGE_SIZE = 6;
-const SIDEBAR_PER_GROUP = 3;
+const FEATURED = 4;
 const EASE = [0.16, 1, 0.3, 1] as const;
+// Category badge colors, in Figma order.
+const BADGE_COLORS = ["bg-green", "bg-orange", "bg-blue", "bg-red"];
 
 function formatDate(date: Date) {
   return new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -50,9 +53,9 @@ function ShareButton({ post, labels }: { post: NewsPost; labels: { share: string
       type="button"
       onClick={share}
       aria-label={labels.share}
-      className="press relative flex size-10 items-center justify-center rounded-full text-navy hover:bg-navy/5"
+      className="press relative flex size-9 items-center justify-center rounded-full text-navy hover:bg-navy/5"
     >
-      {copied ? <Check size={24} weight="bold" /> : <ShareNetwork size={24} />}
+      {copied ? <Check size={20} weight="bold" /> : <ShareNetwork size={20} />}
       <AnimatePresence>
         {copied && (
           <motion.span
@@ -71,195 +74,214 @@ function ShareButton({ post, labels }: { post: NewsPost; labels: { share: string
 }
 
 /**
- * News list (Figma "News landing page"): category tabs, a sidebar of the
- * latest posts per category, and a feed of large post cards.
+ * News list (Figma "News landing page"): a slider of the newest posts, then
+ * category pills over a paged grid of post cards.
  */
 export function NewsExplorer({
   posts,
   dict,
   common,
-  heading,
   notice,
+  showFeatured = true,
 }: {
   posts: NewsPost[];
   dict: Dictionary["news"];
   common: Dictionary["common"];
-  heading: string;
   notice?: ReactNode;
+  showFeatured?: boolean;
 }) {
   const categories = useMemo(() => Array.from(new Set(posts.map((p) => p.category))), [posts]);
-  const tabs = [dict.filterAll, ...categories];
-  const [active, setActive] = useState(dict.filterAll);
-  const [visible, setVisible] = useState(PAGE_SIZE);
+  const badge = (category: string) => BADGE_COLORS[categories.indexOf(category) % BADGE_COLORS.length];
+  const [active, setActive] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [slide, setSlide] = useState(0);
+  const shareLabels = { share: dict.share, linkCopied: dict.linkCopied };
+  const listTop = useRef<HTMLDivElement>(null);
 
-  const filtered = active === dict.filterAll ? posts : posts.filter((p) => p.category === active);
-  const shown = filtered.slice(0, visible);
+  const featured = showFeatured ? posts.slice(0, FEATURED) : [];
+  const filtered = active ? posts.filter((p) => p.category === active) : posts;
+  const pages = Math.ceil(filtered.length / PAGE_SIZE);
+  const shown = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const current = featured[slide];
 
-  // With a single category its name would just repeat the page title.
-  const groups = categories.map((category) => ({
-    category,
-    label: categories.length > 1 ? category : dict.latest,
-    posts: posts.filter((p) => p.category === category).slice(0, SIDEBAR_PER_GROUP),
-  }));
+  function goToPage(next: number) {
+    setPage(next);
+    listTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
-  function selectTab(tab: string) {
+  function selectTab(tab: string | null) {
     setActive(tab);
-    setVisible(PAGE_SIZE);
+    setPage(0);
+  }
+
+  function pill(label: string, value: string | null) {
+    const isActive = active === value;
+    return (
+      <button
+        key={label}
+        role="tab"
+        type="button"
+        aria-selected={isActive}
+        onClick={() => selectTab(value)}
+        className={`shrink-0 rounded-full border px-5 py-2 text-sm font-semibold press ${
+          isActive ? "border-navy bg-navy text-white" : "border-navy/25 bg-white hover:border-navy"
+        }`}
+      >
+        {label}
+      </button>
+    );
   }
 
   return (
     <>
-      {/* Title + category tabs */}
-      <div className="flex flex-col gap-6 border-b border-navy/15 pb-6 lg:flex-row lg:items-end lg:justify-between">
-        <h1 className="font-display text-3xl font-bold uppercase md:text-5xl">{heading}</h1>
-        <div role="tablist" className="-mx-1 flex overflow-x-auto px-1">
-          {tabs.map((tab, i) => {
-            const isActive = tab === active;
-            return (
-              <button
-                key={tab}
-                role="tab"
-                type="button"
-                aria-selected={isActive}
-                onClick={() => selectTab(tab)}
-                className={`relative shrink-0 whitespace-nowrap border-navy px-5 py-2 text-lg press first:pl-0 not-first:border-l hover:text-navy/70 md:px-7 md:text-xl ${
-                  isActive ? "font-bold" : "font-normal"
-                }`}
-              >
-                {tab}
-                {isActive && (
-                  <motion.span
-                    layoutId="news-tab-underline"
-                    className={`absolute bottom-0 right-5 h-[3px] rounded-full bg-navy md:right-8 ${i === 0 ? "left-0" : "left-5 md:left-8"}`}
-                    transition={{ duration: 0.45, ease: EASE }}
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
+      {/* Title */}
+      <div className="text-center">
+        <span className="inline-block rounded-full bg-blue px-4 py-1 text-xs font-bold uppercase text-white md:text-sm">
+          {dict.badge}
+        </span>
+        <h1 className="mt-4 font-display text-3xl font-bold md:text-5xl">{dict.whatsNew}</h1>
       </div>
 
       {notice}
 
-      <div className="mt-12 grid gap-16 lg:grid-cols-[28rem_minmax(0,1fr)] xl:gap-24">
-        {/* Sidebar: latest posts per category */}
-        <aside className="order-last lg:order-first">
-          <div className="space-y-10 lg:sticky lg:top-32">
-            {groups.map((group) => (
-              <div key={group.category}>
-                <h2 className="font-display text-2xl font-bold uppercase md:text-3xl">{group.label}</h2>
-                <ul className="mt-7 space-y-7">
-                  {group.posts.map((post) => (
-                    <li key={post.id}>
-                      <Link href={`/news/${post.slug}`} className="group flex items-start gap-4">
-                        <span className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-navy">
-                          {post.coverImageUrl && (
-                            <Image
-                              src={post.coverImageUrl}
-                              alt=""
-                              fill
-                              sizes="80px"
-                              className="object-cover transition-transform duration-500 group-hover:scale-110"
-                            />
-                          )}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="line-clamp-2 text-lg font-bold leading-snug transition-colors group-hover:text-navy/70">
-                            {post.title}
-                          </span>
-                          <span className="mt-1.5 line-clamp-2 text-base text-navy/60">{post.excerpt}</span>
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+      {/* Featured slider */}
+      {current && (
+        <div className="mx-auto mt-12 max-w-5xl md:mt-16">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.article
+              key={current.id}
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0, transition: { duration: 0.5, ease: EASE } }}
+              exit={{ opacity: 0, x: -30, transition: { duration: 0.2 } }}
+              className="relative grid gap-6 rounded-3xl bg-white p-5 shadow-[0_30px_60px_-36px_rgb(5_19_59/0.55)] ring-1 ring-navy/10 md:grid-cols-[1fr_1.1fr] md:gap-10 md:p-8"
+            >
+              <Link href={`/news/${current.slug}`} tabIndex={-1} aria-hidden className="group relative block aspect-square overflow-hidden rounded-2xl bg-paper">
+                {current.coverImageUrl && (
+                  <Image
+                    src={current.coverImageUrl}
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 100vw, 460px"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                  />
+                )}
+              </Link>
+              <div className="flex flex-col justify-center">
+                <span className="absolute right-5 top-5 rounded-full bg-red px-3 py-0.5 text-xs font-bold text-white md:right-8 md:top-8">
+                  {dict.feature}
+                </span>
+                <span className={`self-start rounded-full px-3 py-0.5 text-xs font-bold text-white ${badge(current.category)}`}>
+                  {current.category}
+                </span>
+                <h2 className="mt-4 font-body text-xl font-bold uppercase leading-snug md:text-2xl">
+                  <Link href={`/news/${current.slug}`} className="hover:text-navy/75">
+                    {current.title}
+                  </Link>
+                </h2>
+                {current.excerpt && <p className="mt-4 line-clamp-4 text-base leading-relaxed">{current.excerpt}</p>}
+                {current.publishedAt && (
+                  <time dateTime={new Date(current.publishedAt).toISOString()} className="mt-4 text-xs text-navy/55">
+                    {formatDate(current.publishedAt)}
+                  </time>
+                )}
+                <div className="mt-6 flex items-center justify-between">
+                  <ShareButton post={current} labels={shareLabels} />
+                  <Link
+                    href={`/news/${current.slug}`}
+                    className="rounded-full bg-navy px-6 py-2.5 text-sm font-bold uppercase text-white press hover:-translate-y-0.5 hover:bg-blue"
+                  >
+                    {common.readMore}
+                  </Link>
+                </div>
               </div>
-            ))}
-          </div>
-        </aside>
-
-        {/* Feed */}
-        <div className="mx-auto w-full max-w-2xl">
-          {filtered.length === 0 ? (
-            <p className="text-navy/60">{dict.emptyCategory}</p>
-          ) : (
-            <ol className="divide-y divide-navy/15">
-              {shown.map((post, i) => (
-                <li key={post.id} className="py-12 first:pt-0">
-                  <Reveal scroll={0}>
-                    <article>
-                      <Link href={`/news/${post.slug}`} className="group block">
-                        <h2 className="font-body text-2xl font-bold leading-snug transition-colors group-hover:text-navy/75 md:text-2xl">
-                          {post.title}
-                        </h2>
-                      </Link>
-                      {post.excerpt && (
-                        <p className="mt-3 line-clamp-3 text-base leading-relaxed md:text-lg">{post.excerpt}</p>
-                      )}
-                      <p className="mt-3 flex items-center gap-2 text-xs text-navy/55">
-                        <span>{post.category}</span>
-                        {post.publishedAt && (
-                          <>
-                            <span aria-hidden className="h-3 w-px bg-navy/30" />
-                            <time dateTime={new Date(post.publishedAt).toISOString()}>{formatDate(post.publishedAt)}</time>
-                          </>
-                        )}
-                      </p>
-
-                      {post.coverImageUrl && (
-                        <Link
-                          href={`/news/${post.slug}`}
-                          tabIndex={-1}
-                          aria-hidden
-                          className="group mt-5 block overflow-hidden rounded-xl bg-navy/5"
-                        >
-                          <div className="relative aspect-[4/3]">
-                            <Image
-                              src={post.coverImageUrl}
-                              alt=""
-                              fill
-                              sizes="(max-width: 768px) 100vw, 672px"
-                              className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
-                            />
-                          </div>
-                        </Link>
-                      )}
-
-                      <div className="mt-5 flex items-center justify-between">
-                        <ShareButton post={post} labels={{ share: dict.share, linkCopied: dict.linkCopied }} />
-                        <Link
-                          href={`/news/${post.slug}`}
-                          className="group inline-flex items-center gap-2 rounded-full bg-navy py-2.5 pl-6 pr-5 text-sm font-bold uppercase text-white press hover:-translate-y-0.5 hover:bg-navy/90 hover:shadow-[0_10px_22px_-10px_rgb(5_19_59/0.7)]"
-                        >
-                          {common.readMore}
-                          <ArrowRight
-                            size={16}
-                            weight="bold"
-                            className="transition-transform duration-300 group-hover:translate-x-1"
-                          />
-                        </Link>
-                      </div>
-                    </article>
-                  </Reveal>
-                </li>
+            </motion.article>
+          </AnimatePresence>
+          {featured.length > 1 && (
+            <div className="mt-6 flex justify-center gap-2">
+              {featured.map((post, i) => (
+                <button
+                  key={post.id}
+                  type="button"
+                  onClick={() => setSlide(i)}
+                  aria-label={post.title}
+                  aria-current={i === slide}
+                  className={`h-2 rounded-full transition-all duration-300 ${i === slide ? "w-6 bg-navy" : "w-2 bg-navy/25 hover:bg-navy/50"}`}
+                />
               ))}
-            </ol>
-          )}
-
-          {visible < filtered.length && (
-            <div className="flex justify-center border-t border-navy/15 pt-10">
-              <button
-                type="button"
-                onClick={() => setVisible((v) => v + PAGE_SIZE)}
-                className="rounded-full border-2 border-navy px-8 py-3 text-sm font-bold uppercase btn-sweep press [--sweep:var(--color-navy)] hover:text-white"
-              >
-                {dict.loadMore}
-              </button>
             </div>
           )}
         </div>
+      )}
+
+      {/* Latest news */}
+      <div ref={listTop} className="mt-20 flex scroll-mt-32 flex-col gap-6 md:mt-24 lg:flex-row lg:items-center lg:justify-between">
+        <h2 className="font-display text-3xl font-bold md:text-4xl">{dict.latestNews}</h2>
+        {categories.length > 1 && (
+          <div role="tablist" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] md:gap-3">
+            {pill(dict.filterAll, null)}
+            {categories.map((c) => pill(c, c))}
+          </div>
+        )}
       </div>
+
+      {filtered.length === 0 ? (
+        <p className="mt-10 text-navy/60">{dict.emptyCategory}</p>
+      ) : (
+        <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-8">
+          {shown.map((post, i) => (
+            <li key={post.id}>
+              <Reveal scroll={(i % 3) * 0.12} className="h-full">
+                <article className="group flex h-full flex-col rounded-2xl bg-white p-3 shadow-[0_18px_40px_-28px_rgb(5_19_59/0.55)] ring-1 ring-navy/10 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1">
+                  <Link href={`/news/${post.slug}`} tabIndex={-1} aria-hidden className="relative block aspect-square overflow-hidden rounded-xl bg-paper">
+                    {post.coverImageUrl && (
+                      <Image
+                        src={post.coverImageUrl}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+                        className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                      />
+                    )}
+                    <span className={`absolute right-3 top-3 rounded-full px-3 py-0.5 text-xs font-bold text-white ${badge(post.category)}`}>
+                      {post.category}
+                    </span>
+                  </Link>
+                  <div className="flex flex-1 flex-col px-2 pb-2 pt-4">
+                    {post.publishedAt && (
+                      <p className="flex items-center gap-1.5 text-xs text-navy/60">
+                        <CalendarBlank size={14} className="text-red" />
+                        <time dateTime={new Date(post.publishedAt).toISOString()}>{formatDate(post.publishedAt)}</time>
+                      </p>
+                    )}
+                    <h3 className="mt-2 font-body text-base font-bold uppercase leading-snug">
+                      <Link href={`/news/${post.slug}`} className="hover:text-navy/75">
+                        {post.title}
+                      </Link>
+                    </h3>
+                    <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-navy/70">{post.excerpt}</p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <ShareButton post={post} labels={shareLabels} />
+                      <Link
+                        href={`/news/${post.slug}`}
+                        className="rounded-full bg-navy px-4 py-1.5 text-xs font-bold uppercase text-white press hover:-translate-y-0.5 hover:bg-blue"
+                      >
+                        {common.readMore}
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Pagination
+        page={page}
+        pages={pages}
+        onChange={goToPage}
+        labels={{ page: dict.page, previous: dict.previous, next: dict.next }}
+      />
     </>
   );
 }

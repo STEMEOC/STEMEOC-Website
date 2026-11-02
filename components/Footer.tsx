@@ -3,7 +3,7 @@ import Image from "next/image";
 import { FacebookLogo, LinkedinLogo, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
 import { getDictionary } from "@/lib/i18n";
 
-const SOCIAL_LINKS = [
+export const SOCIAL_LINKS = [
   { label: "Facebook", href: "https://www.facebook.com/STEMCambodia", icon: FacebookLogo },
   { label: "YouTube", href: "https://www.youtube.com/@StemCambodia", icon: YoutubeLogo },
   { label: "Linkedin", href: "https://www.linkedin.com/company/stemcambodia", icon: LinkedinLogo },
@@ -59,7 +59,7 @@ export async function Footer() {
           <ul className="mt-4 list-disc space-y-1 pl-5 text-sm">
             {dict.footer.getInvolvedLinks.map((label) => (
               <li key={label}>
-                <Link href="/apply" className="link-underline">
+                <Link href="/get-involved" className="link-underline">
                   {label}
                 </Link>
               </li>

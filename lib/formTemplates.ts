@@ -15,17 +15,35 @@ export type FormTemplate = {
   title: string;
   slug: string;
   formDescription: string;
+  /** Opportunity type on /apply */
+  category?: string;
   accentColor: string;
   layout: FormLayout;
   theme: FormTheme;
   fields: FormTemplateField[];
 };
 
+// One per opportunity type; events and internships have no application form
 export const FORM_TEMPLATES: FormTemplate[] = [
   {
-    id: "blank",
-    label: "Blank form",
-    description: "Start from scratch",
+    id: "event",
+    category: "event",
+    label: "Event",
+    description: "Festivals, competitions, talks",
+    color: "var(--color-orange)",
+    title: "",
+    slug: "",
+    formDescription: "",
+    accentColor: "#f49423",
+    layout: "BOLD",
+    theme: "LIGHT",
+    fields: [],
+  },
+  {
+    id: "workshop",
+    category: "workshop",
+    label: "Workshop",
+    description: "Hands-on sessions people sign up for",
     color: "var(--color-blue)",
     title: "",
     slug: "",
@@ -33,11 +51,17 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     accentColor: "#2c80c2",
     layout: "CLASSIC",
     theme: "LIGHT",
-    fields: [],
+    fields: [
+      { label: "Full name", type: "SHORT_TEXT", required: true },
+      { label: "Email", type: "EMAIL", required: true },
+      { label: "Phone number", type: "SHORT_TEXT", required: false },
+      { label: "School or organization", type: "SHORT_TEXT", required: false },
+    ],
   },
   {
     id: "volunteer",
-    label: "Volunteer application",
+    category: "volunteer",
+    label: "Volunteer",
     description: "Collect volunteer sign-ups",
     color: "var(--color-green)",
     title: "Volunteer Application",
@@ -61,40 +85,17 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     ],
   },
   {
-    id: "event-rsvp",
-    label: "Event RSVP",
-    description: "Track attendance for an event",
-    color: "var(--color-orange)",
-    title: "Event RSVP",
-    slug: "event-rsvp",
-    formDescription: "Let us know if you'll be joining us.",
-    accentColor: "#f49423",
-    layout: "BOLD",
-    theme: "LIGHT",
-    fields: [
-      { label: "Full name", type: "SHORT_TEXT", required: true },
-      { label: "Email", type: "EMAIL", required: true },
-      { label: "Will you attend?", type: "MULTIPLE_CHOICE", options: ["Yes", "No", "Maybe"], required: true },
-      { label: "Number of guests", type: "NUMBER", required: false },
-      { label: "Dietary restrictions", type: "SHORT_TEXT", required: false },
-    ],
-  },
-  {
-    id: "contact",
-    label: "Contact form",
-    description: "General inquiries and messages",
+    id: "internship",
+    category: "internship",
+    label: "Internship",
+    description: "Internship roles and details",
     color: "var(--color-red)",
-    title: "Contact Us",
-    slug: "contact",
-    formDescription: "Have a question? Send us a message and we'll get back to you.",
+    title: "",
+    slug: "",
+    formDescription: "",
     accentColor: "#e5262a",
-    layout: "MINIMAL",
+    layout: "CLASSIC",
     theme: "LIGHT",
-    fields: [
-      { label: "Full name", type: "SHORT_TEXT", required: true },
-      { label: "Email", type: "EMAIL", required: true },
-      { label: "Subject", type: "SHORT_TEXT", required: true },
-      { label: "Message", type: "PARAGRAPH", required: true },
-    ],
+    fields: [],
   },
 ];

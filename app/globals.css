@@ -44,6 +44,14 @@
   --font-khmer: var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
 }
 
+:root {
+  /* Height of the sticky floating header (see Header.tsx). */
+  --header-h: 4.75rem;
+  @media (width >= 48rem) {
+    --header-h: 6rem;
+  }
+}
+
 body {
   background: #ffffff;
   color: var(--color-navy);
@@ -343,6 +351,37 @@ html:lang(km) :is(.leading-none, .leading-tight, .leading-snug, .leading-\[1\.05
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Header bar: on a load that plays the intro it starts as a logo circle and
+   grows into the bar once the intro has gone (see HeaderPill.tsx). */
+.header-pill {
+  margin-inline: auto;
+  max-width: 100%;
+  transition:
+    max-width 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.3s,
+    padding 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.3s;
+  & > :nth-child(n + 2) {
+    transition: opacity 0.5s ease 0.85s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: 0.01s;
+    transition-delay: 0s;
+  }
+}
+html:not([data-intro-seen]) .header-pill:not([data-state="open"]) {
+  overflow: hidden;
+}
+html:not([data-intro-seen]) .header-pill[data-state="closed"] {
+  max-width: 4rem;
+  padding-left: 0.6rem;
+  @media (width >= 48rem) {
+    max-width: 5rem;
+    padding-left: 0.75rem;
+  }
+  & > :nth-child(n + 2) {
+    opacity: 0;
   }
 }
 

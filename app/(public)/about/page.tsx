@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Image from "next/image";
-import { Quotes } from "@phosphor-icons/react/dist/ssr";
-import { getPrograms, getSiteStats, getTeamMembers } from "@/lib/content";
+import { ArrowRight, Compass, Flask, Handshake, Lightbulb, Target, UsersThree } from "@phosphor-icons/react/dist/ssr";
+import { getSiteStats, getTeamMembers } from "@/lib/content";
 import { getDictionary } from "@/lib/i18n";
+import { PARTNERS } from "@/lib/brand";
 import { PageTransition } from "@/components/motion/PageTransition";
-import { DrawLine, FadeUp, MaskText, PopIn, StaggerGroup, StaggerItem } from "@/components/motion/Stagger";
+import { Reveal } from "@/components/motion/Reveal";
 import { StatCounter } from "@/components/motion/StatCounter";
-import { ValuesPanel } from "@/components/ValuesPanel";
-import { ProjectsBand } from "@/components/ProjectsBand";
+import { Magnetic } from "@/components/interactive/Magnetic";
+import { PartnerLogos } from "@/components/PartnerLogos";
 import { TeamCard } from "@/components/TeamCard";
+import { Timeline } from "@/components/Timeline";
 import { QuestionsBand } from "@/components/QuestionsBand";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -16,144 +19,187 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: dict.about.metaTitle };
 }
 
-const LOGO_COLORS = ["var(--color-blue)", "var(--color-red)", "var(--color-green)", "var(--color-orange)"];
-
-/** Section heading used down the page: uppercase title with a short rule drawing in under it. */
-function SectionHeading({ title, body, className = "" }: { title: string; body?: string; className?: string }) {
-  return (
-    <StaggerGroup className={className}>
-      <h2 className="font-display text-3xl font-bold uppercase md:text-4xl">
-        <MaskText>{title}</MaskText>
-      </h2>
-      <DrawLine className="mt-5 block h-[3px] w-16 bg-current" />
-      {body && <FadeUp className="mt-5 max-w-xl text-base leading-relaxed opacity-80 md:text-lg">{body}</FadeUp>}
-    </StaggerGroup>
-  );
-}
+// Logo colors, in Figma order.
+const STAT_COLORS = ["bg-green", "bg-orange", "bg-blue"];
+const STAND_FOR = [
+  { icon: Flask, color: "bg-blue", photo: "/uploads/about/values.webp" },
+  { icon: Lightbulb, color: "bg-red", photo: "/uploads/about/workshop.webp" },
+  { icon: UsersThree, color: "bg-orange", photo: "/uploads/about/collage-2.webp" },
+  { icon: Handshake, color: "bg-green", photo: "/uploads/about/collage-3.webp" },
+];
 
 export default async function AboutPage() {
-  const [team, programs, stats, { dict }] = await Promise.all([
-    getTeamMembers(),
-    getPrograms(),
-    getSiteStats(),
-    getDictionary(),
-  ]);
+  const [team, stats, { dict }] = await Promise.all([getTeamMembers(), getSiteStats(), getDictionary()]);
   const a = dict.about;
+  const t = dict.home.landing;
 
   return (
     <PageTransition>
       {/* Hero */}
-      <section className="bg-navy text-white">
-        <StaggerGroup className="container-site flex flex-col items-center pb-16 pt-14 text-center md:pb-20 md:pt-20 lg:pb-24">
-          <FadeUp className="flex items-center gap-3 text-sm font-bold uppercase tracking-[0.2em] text-white/70">
-            <span aria-hidden className="flex gap-1">
-              {LOGO_COLORS.map((color) => (
-                <span key={color} className="size-2 rounded-full" style={{ backgroundColor: color }} />
-              ))}
-            </span>
-            {a.hero.eyebrow}
-          </FadeUp>
-          <h1 className="mt-6 font-display text-4xl font-bold uppercase leading-none md:text-6xl xl:text-7xl">
-            <MaskText>{a.metaTitle}</MaskText>
-          </h1>
-          <FadeUp className="mt-6 max-w-3xl text-balance text-lg leading-relaxed text-white/85 md:text-xl">
-            {a.story.title}
-          </FadeUp>
-        </StaggerGroup>
-      </section>
+      <section className="-mt-(--header-h) bg-navy pt-(--header-h) text-white">
+        <div className="container-site grid items-center gap-12 py-12 md:py-16 lg:grid-cols-[1.15fr_1fr] lg:gap-16 lg:pb-24">
+          <Reveal>
+            <h1 className="font-display text-4xl font-bold md:text-6xl">{a.hero.title}</h1>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed md:text-lg md:text-justify">{a.hero.body}</p>
 
-      {/* Slanted navy tab leading into the story */}
-      <div className="relative overflow-x-clip">
-        <div className="absolute inset-y-0 left-0 w-full bg-navy sm:w-[70%] sm:tab-slant-bottom lg:w-[45%] lg:[--slant:6rem]" />
-        <h2 className="container-site relative py-5 font-display text-2xl font-bold uppercase text-white md:text-3xl">
-          {a.story.eyebrow}
-        </h2>
-      </div>
+            {stats.length > 0 && (
+              <dl className="mt-8 flex flex-wrap gap-4">
+                {stats.slice(0, 3).map((stat, i) => (
+                  <div
+                    key={stat.id}
+                    className="flex min-w-32 flex-col-reverse items-center rounded-[1.25rem] bg-white px-4 py-4 text-navy"
+                  >
+                    <dt className={`mt-2 rounded-full px-3 py-0.5 text-xs font-medium text-white ${STAT_COLORS[i]}`}>
+                      {stat.label}
+                    </dt>
+                    <dd className="font-body text-3xl font-extrabold md:text-4xl">
+                      <StatCounter value={stat.value} />
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
 
-      {/* Story, with the numbers beside it */}
-      <section className="container-site grid items-center gap-12 py-16 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 lg:py-24">
-        <StaggerGroup>
-          <StaggerItem className="relative mx-auto w-full max-w-lg lg:max-w-none">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[1.875rem] bg-placeholder">
-              <Image
-                src="/uploads/STEM-Group.jpg"
-                alt="STEMEOC team and students at the Cambodia Robotics Olympiad"
-                fill
-                priority
-                className="object-cover"
-                sizes="(max-width: 1024px) 512px, 480px"
-              />
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link
+                href="/projects"
+                className="group inline-flex items-center gap-3 rounded-full bg-white px-6 py-2.5 font-display text-navy text-base font-bold press hover:-translate-y-0.5"
+              >
+                {t.exploreAllPrograms}
+                <ArrowRight size={20} weight="bold" className="transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+              <Magnetic strength={0.25}>
+                <Link
+                  href="/apply"
+                  className="inline-flex items-center rounded-full bg-blue px-7 py-2.5 font-display text-base font-bold text-white press hover:-translate-y-0.5 hover:bg-blue-deep"
+                >
+                  {t.getInvolved}
+                </Link>
+              </Magnetic>
             </div>
-            {/* Logo-color bar tucked under the photo's corner */}
-            <span aria-hidden className="absolute -bottom-3 left-8 flex h-1.5 w-40 overflow-hidden rounded-full">
-              {LOGO_COLORS.map((color) => (
-                <span key={color} className="flex-1" style={{ backgroundColor: color }} />
-              ))}
-            </span>
-          </StaggerItem>
-        </StaggerGroup>
+          </Reveal>
 
-        <div>
-          <StaggerGroup>
-            <FadeUp className="text-lg leading-relaxed text-navy/85 md:text-xl">{a.story.body}</FadeUp>
-          </StaggerGroup>
-          {stats.length > 0 && (
-            <StaggerGroup as="ul" className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-navy/15 pt-10" stagger={0.08}>
-              {stats.map((stat, i) => (
-                <StaggerItem as="li" key={stat.id} wave={i}>
-                  <p className="font-body text-4xl font-extrabold md:text-5xl">
-                    <StatCounter value={stat.value} />
-                  </p>
-                  <p className="mt-1 flex items-center gap-2 text-sm font-medium text-navy/70 md:text-base">
-                    <span aria-hidden className="size-2 rounded-full" style={{ backgroundColor: LOGO_COLORS[i % 4] }} />
-                    {stat.label}
-                  </p>
-                </StaggerItem>
-              ))}
-            </StaggerGroup>
-          )}
+          {/* Photo collage */}
+          <Reveal delay={0.15} className="relative mx-auto aspect-[670/780] w-full max-w-xl">
+            <div className="absolute left-[1.5%] top-0 h-[34%] w-[64.6%] overflow-hidden rounded-2xl shadow-lg">
+              <Image src="/uploads/about/collage-2.webp" alt="Students presenting a project at the STEM Festival" fill priority className="object-cover" sizes="(max-width: 1024px) 60vw, 380px" />
+            </div>
+            <div className="absolute right-0 top-[13.3%] h-[76.7%] w-[67.6%] overflow-hidden rounded-2xl shadow-lg">
+              <Image src="/uploads/about/collage-3.webp" alt="Visitors at the STEM Festival exhibition" fill priority className="object-cover" sizes="(max-width: 1024px) 65vw, 400px" />
+            </div>
+            <div className="absolute bottom-0 left-0 h-[36.5%] w-[67.6%] overflow-hidden rounded-2xl shadow-lg">
+              <Image src="/uploads/about/collage-4.webp" alt="Participants of the Cambodia Robotics Olympiad 2024 on stage" fill className="object-cover" sizes="(max-width: 1024px) 65vw, 400px" />
+            </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* Mission */}
-      <section className="relative overflow-hidden bg-navy text-white">
-        <StaggerGroup className="container-site flex flex-col items-center py-20 text-center md:py-28">
-          <PopIn className="flex size-16 items-center justify-center rounded-full bg-white text-navy md:size-20">
-            <Quotes weight="fill" className="size-8 md:size-10" />
-          </PopIn>
-          <FadeUp className="mt-6 text-sm font-bold uppercase tracking-[0.2em] text-white/60">{a.mission.eyebrow}</FadeUp>
-          <p className="mt-5 max-w-5xl text-balance font-display text-2xl font-bold leading-snug md:text-4xl">
-            <MaskText>{a.mission.title}</MaskText>
-          </p>
-        </StaggerGroup>
+      {/* Our Story, on a white tab rising out of the hero */}
+      <section className="relative">
+        <div className="absolute bottom-full left-0 h-10 w-[85%] bg-white tab-slant-top [--slant:3rem] md:h-14 md:w-[55%] md:[--slant:5rem]" />
+        <div className="container-site py-12 md:py-16">
+          <Reveal className="max-w-2xl">
+            <h2 className="font-display text-3xl font-bold md:text-5xl">{a.story.title}</h2>
+            <p className="mt-4 text-base md:text-lg md:text-justify">{a.story.body}</p>
+          </Reveal>
+
+          <Timeline items={a.timeline} />
+        </div>
       </section>
 
-      {/* Values */}
-      <ValuesPanel
-        eyebrow={a.values.eyebrow}
-        title={dict.home.pillars.title}
-        body={dict.home.pillars.body}
-        items={dict.home.pillars.items}
-      />
+      {/* Mission and vision */}
+      <section className="container-site py-12 md:py-20">
+        <div className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem]">
+          <Image src="/uploads/about/mission.webp" alt="" fill className="object-cover" sizes="100vw" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_top,rgb(245_247_250/0.95),rgb(245_247_250/0.4))]" />
+          <div className="relative grid gap-6 px-5 pb-5 pt-28 md:grid-cols-2 md:gap-8 md:px-12 md:pb-12 md:pt-44">
+            {[
+              { label: a.mission.label, body: a.mission.body, icon: Target, color: "bg-blue" },
+              { label: a.vision.label, body: a.vision.body, icon: Compass, color: "bg-green" },
+            ].map(({ label, body, icon: Icon, color }, i) => (
+              <Reveal key={label} delay={i * 0.12} className="relative min-h-72 overflow-hidden rounded-[1.5rem] bg-white p-8 shadow-[0_8px_40px_-12px_rgb(5_19_59/0.25)] md:min-h-80 md:p-12">
+                <Image
+                  src="/brand/logo-mark.png"
+                  alt=""
+                  width={400}
+                  height={395}
+                  className="pointer-events-none absolute -bottom-16 -right-16 w-52 opacity-[0.07] md:-bottom-20 md:-right-20 md:w-64"
+                />
+                <span className={`absolute right-6 top-6 flex size-9 items-center justify-center rounded-full text-white ${color}`}>
+                  <Icon size={20} weight="bold" />
+                </span>
+                <p className="relative text-base">{a.our}</p>
+                <h2 className="relative font-display text-3xl font-bold md:text-4xl">{label}</h2>
+                <p className="relative mt-6 text-base leading-relaxed md:text-lg md:text-justify">{body}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      {/* Projects */}
-      <ProjectsBand title={dict.home.landing.projectsTitle} detailLabel={dict.home.landing.detail} programs={programs} />
+      {/* What we stand for */}
+      <section className="container-site py-12 md:py-16">
+        <Reveal className="mx-auto max-w-2xl text-center">
+          <h2 className="font-display text-3xl font-bold md:text-5xl">{a.standFor.title}</h2>
+          <p className="mt-4 text-base md:text-lg">{a.standFor.body}</p>
+        </Reveal>
+        <ul className="mt-12 grid gap-5 md:grid-cols-2">
+          {a.standFor.items.map((item, i) => {
+            const { icon: Icon, color, photo } = STAND_FOR[i % STAND_FOR.length];
+            return (
+              <li key={item.title}>
+                <Reveal scroll={(i % 2) * 0.12} className="relative flex h-full items-center gap-6 rounded-[1.5rem] bg-paper p-5 md:gap-8 md:p-6">
+                  <span className={`absolute right-5 top-5 flex size-8 items-center justify-center rounded-full text-white ${color}`}>
+                    <Icon size={18} weight="bold" />
+                  </span>
+                  <div className="relative aspect-[4/3.6] w-2/5 shrink-0 overflow-hidden rounded-2xl">
+                    <Image src={photo} alt="" fill className="object-cover" sizes="(max-width: 768px) 40vw, 260px" />
+                  </div>
+                  <div className="pr-8">
+                    <h3 className="font-body text-lg font-bold md:text-xl">{item.title}</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-[#6a6a6a] md:text-base">{item.body}</p>
+                  </div>
+                </Reveal>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="mt-12 text-center">
+          <Link
+            href="/child-protection-policy"
+            className="inline-flex items-center rounded-full bg-red px-8 py-3 font-display text-base font-bold text-white underline underline-offset-4 press hover:-translate-y-0.5 md:text-lg"
+          >
+            {a.childPolicy}
+          </Link>
+        </div>
+      </section>
+
+      {/* Partners */}
+      <section className="container-site py-12 md:py-16">
+        <h2 className="text-center font-body text-xl font-semibold text-[#6a6a6a] md:text-2xl">{t.partnersTitle}</h2>
+        <div className="mt-10">
+          <PartnerLogos partners={PARTNERS} />
+        </div>
+      </section>
 
       {/* Team */}
       {team.length > 0 && (
-        <section id="team" className="container-site scroll-mt-32 py-20 md:py-28">
-          <SectionHeading title={a.team.eyebrow} body={a.team.title} />
-          <StaggerGroup
-            as="ul"
-            className="mt-12 grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 md:gap-x-8 lg:grid-cols-4"
-            stagger={0.06}
-          >
-            {team.map((member, i) => (
-              <StaggerItem as="li" key={member.id} wave={Math.floor(i / 4) + (i % 4)}>
-                <TeamCard member={member} />
-              </StaggerItem>
-            ))}
-          </StaggerGroup>
+        <section id="team" className="scroll-mt-32 bg-paper py-16 md:py-24">
+          <div className="container-site">
+            <Reveal className="text-center">
+              <p className="text-base md:text-lg">{a.team.eyebrow}</p>
+              <h2 className="font-display text-3xl font-bold md:text-4xl">{a.team.title}</h2>
+            </Reveal>
+            <ul className="mt-12 grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 md:gap-x-8 lg:grid-cols-4">
+              {team.map((member, i) => (
+                <li key={member.id}>
+                  <Reveal scroll={(i % 4) * 0.12}>
+                    <TeamCard member={member} />
+                  </Reveal>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
       )}
 
@@ -161,7 +207,7 @@ export default async function AboutPage() {
         title={dict.footer.questions.title}
         body={dict.footer.questions.body}
         cta={dict.footer.questions.cta}
-        href="/contact"
+        href="/faq"
       />
     </PageTransition>
   );

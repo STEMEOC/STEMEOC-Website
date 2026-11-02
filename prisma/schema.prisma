@@ -145,6 +145,9 @@ model Form {
   description String?
   published   Boolean           @default(true)
   accentColor String            @default("#2c80c2")
+  category    String            @default("volunteer")
+  location    String            @default("Phnom Penh")
+  deadline    String?           @default("Rolling")
   layout      FormLayout        @default(CLASSIC)
   coverImageUrl String?
   theme       FormTheme         @default(LIGHT)

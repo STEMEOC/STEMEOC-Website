@@ -67,13 +67,15 @@ const FormSchema = z.object({
     .max(300)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "The form link can only use lowercase letters, numbers and hyphens"),
   description: z.string().trim().max(2000).optional().or(z.literal("")),
+  category: z.enum(["event", "workshop", "volunteer", "internship"], { message: "Pick an opportunity type" }),
+  location: z.string().trim().max(120),
+  deadline: z.string().trim().max(60),
   published: z.coerce.boolean(),
   accentColor: z.string().trim().regex(/^#[0-9a-fA-F]{6}$/, "Pick a valid color"),
   layout: z.enum(["CLASSIC", "MINIMAL", "BOLD", "COVER", "SIDEBAR", "DUOTONE", "FRAMED", "BADGE"]),
   theme: z.enum(["LIGHT", "DARK"]),
   fields: z
     .array(FieldSchema)
-    .min(1, "Add at least one question")
     .refine(
       (fields) => fields.every((f) => !["DROPDOWN", "MULTIPLE_CHOICE", "CHECKBOXES"].includes(f.type) || f.options.length > 0),
       "Every choice question needs at least one option"
@@ -92,8 +94,11 @@ function parseFormData(formData: FormData): ParsedForm {
 
   const result = FormSchema.safeParse({
     title: formData.get("title"),
-    slug: formData.get("slug"),
+    slug: formData.get("slug") || "form",
     description: formData.get("description") || "",
+    category: formData.get("category"),
+    location: formData.get("location") ?? "",
+    deadline: formData.get("deadline") ?? "",
     published: formData.get("published") === "on",
     accentColor: formData.get("accentColor"),
     layout: formData.get("layout"),
@@ -112,6 +117,16 @@ async function assertSlugFree(slug: string, exceptId?: string) {
   if (taken) {
     throw new FormSaveError(`The link /apply/${slug} is already used by “${taken.title}”. Please choose a different one.`);
   }
+}
+
+// link is hidden in the builder, so add -2, -3... instead of asking the admin
+async function uniqueSlug(base: string) {
+  const taken = new Set(
+    (await prisma.form.findMany({ where: { slug: { startsWith: base } }, select: { slug: true } })).map((f) => f.slug)
+  );
+  let slug = base;
+  for (let n = 2; taken.has(slug); n++) slug = `${base}-${n}`;
+  return slug;
 }
 
 async function resolveCoverImageUrl(formData: FormData): Promise<string | null> {
@@ -143,14 +158,17 @@ export async function createForm(_prev: FormSaveState, formData: FormData): Prom
   await requireAdmin();
   try {
     const data = parseFormData(formData);
-    await assertSlugFree(data.slug);
+    const slug = await uniqueSlug(data.slug);
     const coverImageUrl = await resolveCoverImageUrl(formData);
 
     await prisma.form.create({
       data: {
         title: data.title,
-        slug: data.slug,
+        slug,
         description: data.description || null,
+        category: data.category,
+        location: data.location,
+        deadline: data.deadline || null,
         published: data.published,
         accentColor: data.accentColor,
         layout: data.layout,
@@ -208,6 +226,9 @@ export async function updateForm(id: string, _prev: FormSaveState, formData: For
           title: data.title,
           slug: data.slug,
           description: data.description || null,
+          category: data.category,
+          location: data.location,
+          deadline: data.deadline || null,
           published: data.published,
           accentColor: data.accentColor,
           layout: data.layout,

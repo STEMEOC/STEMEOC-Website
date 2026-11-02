@@ -124,7 +124,7 @@ export default async function SearchPage({
     <PageTransition>
       <SearchPendingProvider>
         {/* Hero with the search field */}
-        <section className="bg-navy text-white">
+        <section className="-mt-(--header-h) bg-navy pt-(--header-h) text-white">
           <div className="container-site flex flex-col items-center pb-14 pt-12 text-center md:pb-16 md:pt-16">
             <p className="flex items-center gap-3 text-sm font-bold uppercase tracking-[0.2em] text-white/70">
               <span aria-hidden className="flex gap-1">

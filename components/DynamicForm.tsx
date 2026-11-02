@@ -63,37 +63,40 @@ export function DynamicForm({ form }: { form: Form & { fields: FormField[] } }) 
       description={form.description}
       coverImageUrl={form.coverImageUrl}
     >
-      <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
-        {form.fields.map((field) => (
-          <div key={field.id}>
-            <label htmlFor={field.id} className="text-sm font-bold">
-              {field.label}
-              {field.required && <span className="text-red"> *</span>}
-            </label>
-            <FieldInput field={field} dark={dark} />
-            {fieldErrors[field.id] && (
-              <p className="mt-1 text-sm text-red" role="alert">
-                {fieldErrors[field.id]}
-              </p>
-            )}
-          </div>
-        ))}
+      {/* Details-only opportunities (events, internships) have no questions */}
+      {form.fields.length > 0 && (
+        <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
+          {form.fields.map((field) => (
+            <div key={field.id}>
+              <label htmlFor={field.id} className="text-sm font-bold">
+                {field.label}
+                {field.required && <span className="text-red"> *</span>}
+              </label>
+              <FieldInput field={field} dark={dark} />
+              {fieldErrors[field.id] && (
+                <p className="mt-1 text-sm text-red" role="alert">
+                  {fieldErrors[field.id]}
+                </p>
+              )}
+            </div>
+          ))}
 
-        {state.status === "error" && (
-          <p className="rounded-xl bg-red/10 px-4 py-3 text-sm font-medium text-red" role="alert">
-            {state.message}
-          </p>
-        )}
+          {state.status === "error" && (
+            <p className="rounded-xl bg-red/10 px-4 py-3 text-sm font-medium text-red" role="alert">
+              {state.message}
+            </p>
+          )}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-full px-7 py-3.5 text-sm font-bold text-white press hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:hover:translate-y-0"
-          style={{ backgroundColor: form.accentColor }}
-        >
-          {pending ? "Submitting" : "Submit"}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={pending}
+            className="rounded-full px-7 py-3.5 text-sm font-bold text-white press hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:hover:translate-y-0"
+            style={{ backgroundColor: form.accentColor }}
+          >
+            {pending ? "Submitting" : "Submit"}
+          </button>
+        </form>
+      )}
     </FormStyleFrame>
   );
 }

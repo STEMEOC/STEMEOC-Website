@@ -76,6 +76,12 @@ export type ProgramEvent = {
   /** The image is a poster or logo: show all of it rather than crop. */
   imageContain?: boolean;
   photos?: Photo[];
+  /** YouTube ID for the edition's highlight video. */
+  video?: string;
+  /** Link to the edition's full report (PDF). */
+  reportUrl?: string;
+  /** Teams or entries per category, for the participation bars. */
+  participation?: { category: string; count: number }[];
   /** Show the program's competition categories (with Register buttons). */
   showCategories?: boolean;
   winners?: Winners;
@@ -87,6 +93,10 @@ export type ProgramPage = {
   whatIsTitle: string;
   whatIs: string;
   overviewImage: string;
+  /** YouTube ID; shown in place of the overview image. */
+  video?: string;
+  /** Color of the eyebrow, active tab and image backs. Defaults to blue. */
+  accent?: "blue" | "red";
   stats: Stat[];
   preRegisterUrl?: string;
   sections: { title: string; intro: string; categories: ProgramCategory[] }[];
@@ -96,6 +106,7 @@ export type ProgramPage = {
 };
 
 const CRO_2026 = "/projects/cambodia-robotics-olympiad/2026";
+const FESTIVAL_2026 = "/projects/annual-stem-festivals/2026";
 const WRO_REGISTER = "https://docs.google.com/forms/d/1eba2fA6SbAQKyoO2dmh4vn0II3NeloFzI7bKcOOFaJg/viewform";
 
 export const PROGRAM_PAGES: Record<string, ProgramPage> = {
@@ -107,6 +118,8 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
     whatIs:
       "The Cambodian Robotics Olympiad, proudly organized by STEMEOC, is a prestigious national competition that inspires students to push the boundaries of creativity and innovation in robotics. Participants are challenged to design, build, and program robots to solve real-world problems, offering them a unique platform to showcase their talents and skills. This exciting event features five diverse categories: RoboMission, Future Innovators, Future Engineers, Robot Sumo, and Robot Tug of War, ensuring a variety of challenges that cater to different interests and skill levels.",
     overviewImage: "/uploads/CRO-4-scaled.jpg",
+    video: "whgAwFyZ8js",
+    accent: "red",
     // From the CRO event recap: "over 900 visitors, including more than 200
     // students competing across the five categories".
     stats: [
@@ -125,6 +138,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
             name: "Robot Tug of War",
             description: "Two robots, one rope. Build for grip, torque and balance to out-pull the other team.",
             icon: "tug",
+            image: "/uploads/categories/robot-tug-of-war.jpg",
             fee: "$15 / team",
             learnMoreUrl: CRO_2026,
             registerUrl: "https://forms.gle/6fsMzwqpRxNRz1JQ7",
@@ -156,6 +170,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
             name: "Future Innovators",
             description: "Design and build a robotics project that answers the season's theme.",
             icon: "innovator",
+            image: "/uploads/categories/future-innovators.jpg",
             fee: "$30 / team",
             learnMoreUrl: CRO_2026,
             registerUrl: WRO_REGISTER,
@@ -197,6 +212,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       {
         slug: "2026",
         year: "2026",
+        video: "whgAwFyZ8js",
         date: "5 September 2026",
         title: "Cambodia Robotics Olympiad 2026",
         venue: "AEON Mall Mean Chey, AEON Hall (1st floor)",
@@ -349,6 +365,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       {
         slug: "2025",
         year: "2025",
+        video: "wSe7v2gOx8k",
         date: "6 September 2025",
         title: "Cambodia Robotics Olympiad 2025",
         venue: "AEON Mall Mean Chey, AEON Hall (1st floor)",
@@ -430,6 +447,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       {
         slug: "2024",
         year: "2024",
+        video: "Ouj-iHiXBrQ",
         date: "September 2024",
         title: "Cambodia Robotics Olympiad 2024",
         summary:
@@ -481,7 +499,42 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       { value: "200+", label: "Student projects" },
       { value: "10,000+", label: "Plastic items saved (2024)" },
     ],
-    sections: [],
+    sections: [
+      {
+        title: "Key Programs",
+        intro: "Every festival brings students, schools and families together through exhibits, performances, contests and hands-on games.",
+        categories: [
+          {
+            name: "STEM Project Exhibition",
+            description: "Students from schools across Cambodia build and present their own projects, from model cities to working machines.",
+            icon: "innovator",
+            image: "/uploads/events/festival-2025/06.jpg",
+            learnMoreUrl: FESTIVAL_2026,
+          },
+          {
+            name: "STEM Performances",
+            description: "Students perform creative shows on stage inspired by the festival's theme.",
+            icon: "mission",
+            image: "/uploads/events/festival-2025/01.jpg",
+            learnMoreUrl: FESTIVAL_2026,
+          },
+          {
+            name: "Primary School Art Contest",
+            description: "Grades 1 to 6 draw and paint the festival's theme, with results announced at the festival.",
+            icon: "engineer",
+            image: "/uploads/events/festival-2026/02.jpg",
+            learnMoreUrl: FESTIVAL_2026,
+          },
+          {
+            name: "Quizzes and Games",
+            description: "Fun quizzes and challenges where students test their knowledge and win prizes.",
+            icon: "sumo",
+            image: "/uploads/events/festival-2025/05.jpg",
+            learnMoreUrl: FESTIVAL_2026,
+          },
+        ],
+      },
+    ],
     photos: [
       { src: "/uploads/STEMFest2026-49.jpg", alt: "Crowds at the Annual Cambodia STEM Festival 2026" },
       { src: "/uploads/unnamed-scaled.png", alt: "STEM Festival 2026 poster: Patterns and Programming", contain: true },
@@ -493,6 +546,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       {
         slug: "2026",
         year: "2026",
+        video: "NKvKym71_o0",
         date: "7 February 2026",
         title: "Annual Cambodia STEM Festival 2026",
         venue: "The Premier Centre Sen Sok, Halls D, E, F & G",
@@ -529,6 +583,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       {
         slug: "2025",
         year: "2025",
+        video: "0qBF2vCrlmA",
         date: "8 February 2025",
         title: "Annual Cambodia STEM Festival 2025",
         venue: "The Premier Centre Sen Sok, Halls A, B, C & D",
@@ -548,6 +603,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       {
         slug: "2024",
         year: "2024",
+        video: "XkeGbH6NbQQ",
         date: "10–11 May 2024",
         title: "Annual Cambodia STEM Festival 2024",
         venue: "AEON Mall Mean Chey",
@@ -574,6 +630,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       {
         slug: "2023",
         year: "2023",
+        video: "Y4rrgeBw9SY",
         date: "24–25 February 2023",
         title: "Annual Cambodia STEM Festival 2023",
         venue: "The Premier Centre Sen Sok, Halls F & G",
@@ -589,6 +646,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       {
         slug: "2021",
         year: "2021",
+        video: "Y2XhehCPjT0",
         date: "25–29 January 2021",
         title: "Annual Cambodia STEM Festival 2021",
         venue: "Online",
@@ -756,9 +814,21 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
     whatIs:
       "Environmental stewardship is one of STEMEOC's core values. Through Eco-STEM (formerly Eco Heroes), students take what they learn in science and engineering out into their communities: clean-up days, plastic-awareness tours, and green-innovation projects at the STEM Festival. The 18th Annual Cambodia STEM Festival alone avoided more than 10,000 single-use plastic items.",
     overviewImage: "/uploads/Artboard-5.png",
-    stats: [],
+    stats: [
+      { value: "5", label: "Provinces Covered" },
+      { value: "200", label: "Total Cleanups" },
+      { value: "30", label: "Schools" },
+      { value: "5", label: "Projects" },
+    ],
     sections: [],
-    photos: [],
+    photos: [
+      { src: "/uploads/events/plastic-odyssey-2019/01.jpg", alt: "Eco Heroes students on the deck of the Plastic Odyssey ship" },
+      { src: "/uploads/events/plastic-odyssey-2019/02.jpg", alt: "Students and guides with worksheets aboard Plastic Odyssey" },
+      { src: "/uploads/events/plastic-odyssey-2019/03.jpg", alt: "Students exploring the Plastic Odyssey ship's lab and library" },
+      { src: "/uploads/events/festival-2024/01.jpg", alt: "Green Innovation exhibition projects at Cambodia STEM Festival" },
+      { src: "/uploads/6057366070777463922.jpg", alt: "Educational trip to Keo Seima Wildlife Sanctuary" },
+      { src: "/uploads/events/festival-2025/01.jpg", alt: "Eco-STEM student participants showcase" },
+    ],
     events: [
       {
         slug: "cleanup-day-2024",

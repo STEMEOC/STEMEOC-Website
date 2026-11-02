@@ -44,7 +44,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       lang={locale}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
-      className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} ${khmerFont.variable} h-full scroll-smooth antialiased`}
+      className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} ${khmerFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-navy">
         <ViewTransitionGuard />

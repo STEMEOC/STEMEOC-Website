@@ -35,7 +35,7 @@ const NAV_GROUPS = [
     label: "Responses",
     items: [
       { href: "/admin/messages", label: "Messages", icon: ChatCircleText },
-      { href: "/admin/forms", label: "Forms", icon: ClipboardText },
+      { href: "/admin/forms", label: "Opportunities", icon: ClipboardText },
     ],
   },
   {
