@@ -436,6 +436,21 @@ html[data-intro-seen] .intro-curtain {
   animation: none;
 }
 
+/* Keep the opening screen above the page while it reveals behind it. */
+.intro-curtain {
+  view-transition-name: intro-curtain;
+}
+::view-transition-group(intro-curtain) {
+  animation: none;
+  z-index: 101;
+}
+::view-transition-old(intro-curtain) {
+  display: none;
+}
+::view-transition-new(intro-curtain) {
+  animation: none;
+}
+
 /* Don't swallow clicks while a transition is running. */
 ::view-transition {
   pointer-events: none;
