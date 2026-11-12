@@ -66,6 +66,8 @@ export const en = {
       storyBody:
         "At STEM Education Organisation for Cambodia (STEMEOC), we believe in empowering students to unlock their full potential through hands-on learning and real-world applications of STEM knowledge. Through our programs, we aim for students to gain exposure to emerging technologies, leadership opportunities, and a supportive community that encourages their growth.",
       nextTab: "Next tab",
+      prevPrograms: "Previous programs",
+      nextPrograms: "Next programs",
       programsTitle: "Programs",
       programsBody: "Festivals, competitions and school programs that bring hands-on STEM to students across Cambodia.",
       exploreAllPrograms: "Explore all programs",
@@ -229,6 +231,8 @@ export const en = {
     team: {
       eyebrow: "Our People",
       title: "Meet the Team",
+      prev: "Previous team members",
+      next: "Next team members",
     },
   },
   apply: {
@@ -421,6 +425,16 @@ export const en = {
     videos: "Video footage/Interview",
     sharePost: "Share this post",
     moreFromCategory: "More from the category",
+    nextStory: "Next story",
+    prevNews: "Previous news",
+    nextNews: "Next news",
+    categories: {
+      News: "News",
+      Events: "Events",
+      Workshops: "Workshops",
+      Opportunities: "Opportunities",
+      Competitions: "Competitions",
+    } as Record<string, string>,
   },
   hallOfFame: {
     metaTitle: "Hall of Fame",
@@ -517,13 +531,18 @@ export const en = {
     winningTeams: "winning teams",
     venue: "Venue",
     event: {
+      openPhoto: "Open photo",
+      prevPhoto: "Previous photo",
+      closePhoto: "Close",
       nextPhoto: "Show next photo",
       back: "Back",
       downloadReport: "Download full report",
       participation: "Participation",
       whoTookPart: "Who took part, by category",
+      countUnits: { people: "Number of people", teams: "Number of teams" },
       winners: "Winners",
       champions: "Meet our Champions",
+      awardsPresented: "Awards and presenters",
       highlight: "Highlight",
       moments: "Moments from the Event.",
       thanks: "Thank you to our partners and sponsors",

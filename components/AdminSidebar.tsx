@@ -15,13 +15,17 @@ import {
   SignOut,
   ArrowSquareOut,
   Question,
+  Table,
 } from "@phosphor-icons/react/dist/ssr";
 import { logoutAction } from "@/lib/actions/auth";
 
 const NAV_GROUPS = [
   {
     label: null,
-    items: [{ href: "/admin/dashboard", label: "Dashboard", icon: SquaresFour }],
+    items: [
+      { href: "/admin/dashboard", label: "Dashboard", icon: SquaresFour },
+      { href: "/admin/dataset", label: "Dataset", icon: Table },
+    ],
   },
   {
     label: "Content",

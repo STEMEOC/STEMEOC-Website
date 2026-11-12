@@ -29,7 +29,8 @@ const panelVariants: Variants = {
  *
  * Without `actions`, the tabs sit in white on a slanted navy notch (pull it up
  * over the hero with a negative margin), and `nextLabel` adds a round red
- * button that moves to the next tab. `light` makes that notch white with navy tabs.
+ * button that moves to the next tab. `light` makes that notch white with pill
+ * tabs; `activeTone` colors the active pill.
  */
 export function AboutTabs({
   actions,
@@ -37,12 +38,14 @@ export function AboutTabs({
   side = "left",
   nextLabel,
   light = false,
+  activeTone = "bg-navy",
 }: {
   actions?: ReactNode;
   tabs: Tab[];
   side?: "left" | "right";
   nextLabel?: string;
   light?: boolean;
+  activeTone?: string;
 }) {
   const inset = !actions;
   const [[active, direction], setState] = useState<[string | undefined, number]>([tabs[0]?.id, 0]);
@@ -66,7 +69,7 @@ export function AboutTabs({
     buttons.current[next]?.focus();
   }
 
-  function tabButton(tab: Tab, i: number, tone: string, bar: string) {
+  function tabButton(tab: Tab, i: number, tone: string, bar: string, pill = false) {
     return (
           <button
             key={tab.id}
@@ -81,12 +84,18 @@ export function AboutTabs({
             tabIndex={active === tab.id ? 0 : -1}
             onClick={() => setActive(tab.id)}
             onKeyDown={(e) => onKeyDown(e, i)}
-            className={`relative shrink-0 whitespace-nowrap px-5 text-xl leading-10 press first:pl-0 not-first:border-l ${tone} md:px-6 md:text-xl md:leading-10 ${
-              active === tab.id ? "font-semibold" : "font-normal"
-            }`}
+            className={
+              pill
+                ? `shrink-0 whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold press md:text-base ${
+                    active === tab.id ? `${tone} text-white` : "border border-navy/30 text-navy/70 hover:text-navy"
+                  }`
+                : `relative shrink-0 whitespace-nowrap px-5 text-xl leading-10 press first:pl-0 not-first:border-l ${tone} md:px-6 md:text-xl md:leading-10 ${
+                    active === tab.id ? "font-semibold" : "font-normal"
+                  }`
+            }
           >
             {tab.label}
-            {active === tab.id && (
+            {!pill && active === tab.id && (
               <motion.span
                 layoutId={`${base}-tab-indicator`}
                 aria-hidden
@@ -105,11 +114,11 @@ export function AboutTabs({
           <div className={`absolute top-0 left-0 w-full ${light ? "-bottom-px bg-white" : "bottom-0 bg-navy"} [--slant:4rem] sm:w-[85%] sm:tab-slant-top lg:w-[50%] lg:[--slant:6rem]`} />
           <div
             role="tablist"
-            className="container-site relative flex overflow-x-auto py-5 [scrollbar-width:none] md:py-7"
+            className={`container-site relative flex overflow-x-auto py-5 [scrollbar-width:none] md:py-7 ${light ? "gap-3" : ""}`}
           >
             {tabs.map((tab, i) =>
               light
-                ? tabButton(tab, i, "border-navy text-navy hover:text-navy/70", "bg-navy")
+                ? tabButton(tab, i, activeTone, "", true)
                 : tabButton(tab, i, "border-white/70 text-white hover:text-white/75", "bg-white"),
             )}
           </div>

@@ -68,6 +68,8 @@ export const km: Dictionary = {
       storyBody:
         "នៅអង្គការអប់រំ STEM សម្រាប់កម្ពុជា (STEMEOC) យើងជឿជាក់លើការលើកទឹកចិត្តសិស្សានុសិស្សឱ្យបញ្ចេញសក្តានុពលពេញលេញ តាមរយៈការរៀនដោយអនុវត្តផ្ទាល់ និងការប្រើប្រាស់ចំណេះដឹង STEM ក្នុងជីវិតពិត។ តាមរយៈកម្មវិធីរបស់យើង សិស្សទទួលបានបទពិសោធន៍ជាមួយបច្ចេកវិទ្យាថ្មីៗ ឱកាសភាពជាអ្នកដឹកនាំ និងសហគមន៍ដែលគាំទ្រការរីកចម្រើនរបស់ពួកគេ។",
       nextTab: "ផ្ទាំងបន្ទាប់",
+      prevPrograms: "កម្មវិធីមុន",
+      nextPrograms: "កម្មវិធីបន្ទាប់",
       programsTitle: "កម្មវិធី",
       programsBody: "ពិព័រណ៍ ការប្រកួត និងកម្មវិធីសាលារៀន ដែលនាំ STEM ដោយអនុវត្តផ្ទាល់ ទៅដល់សិស្សានុសិស្សទូទាំងប្រទេសកម្ពុជា។",
       exploreAllPrograms: "មើលកម្មវិធីទាំងអស់",
@@ -230,6 +232,8 @@ export const km: Dictionary = {
     team: {
       eyebrow: "បុគ្គលិករបស់យើង",
       title: "ស្គាល់ក្រុមការងារ",
+      prev: "សមាជិកមុន",
+      next: "សមាជិកបន្ទាប់",
     },
   },
   apply: {
@@ -305,6 +309,16 @@ export const km: Dictionary = {
     videos: "វីដេអូ និងបទសម្ភាសន៍",
     sharePost: "ចែករំលែកប្រកាសនេះ",
     moreFromCategory: "ព័ត៌មានផ្សេងទៀតក្នុងប្រភេទនេះ",
+    nextStory: "រឿងបន្ទាប់",
+    prevNews: "ព័ត៌មានមុន",
+    nextNews: "ព័ត៌មានបន្ទាប់",
+    categories: {
+      News: "ព័ត៌មាន",
+      Events: "ព្រឹត្តិការណ៍",
+      Workshops: "សិក្ខាសាលា",
+      Opportunities: "ឱកាស",
+      Competitions: "ការប្រកួត",
+    },
   },
   hallOfFame: {
     metaTitle: "សាលកិត្តិយស",
@@ -401,13 +415,18 @@ export const km: Dictionary = {
     winningTeams: "ក្រុមឈ្នះ",
     venue: "ទីកន្លែង",
     event: {
+      openPhoto: "បើករូបភាព",
+      prevPhoto: "រូបភាពមុន",
+      closePhoto: "បិទ",
       nextPhoto: "បង្ហាញរូបភាពបន្ទាប់",
       back: "ត្រឡប់ក្រោយ",
       downloadReport: "ទាញយករបាយការណ៍ពេញ",
       participation: "ការចូលរួម",
       whoTookPart: "អ្នកចូលរួម តាមប្រភេទ",
+      countUnits: { people: "ចំនួនមនុស្ស", teams: "ចំនួនក្រុម" },
       winners: "អ្នកឈ្នះ",
       champions: "ជួបជាមួយជើងឯករបស់យើង",
+      awardsPresented: "ពានរង្វាន់ និងអ្នកប្រគល់",
       highlight: "ចំណុចលេចធ្លោ",
       moments: "ពេលវេលាពីព្រឹត្តិការណ៍។",
       thanks: "សូមអរគុណដៃគូ និងអ្នកឧបត្ថម្ភរបស់យើង",

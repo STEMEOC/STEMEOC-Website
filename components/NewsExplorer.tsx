@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { CalendarBlank, Check, ShareNetwork } from "@phosphor-icons/react";
+import { ArrowRight, CalendarBlank, Check, ShareNetwork } from "@phosphor-icons/react";
 import { Reveal } from "@/components/motion/Reveal";
-import { Pagination } from "@/components/Pagination";
+import { ScrollRow } from "@/components/ScrollRow";
+import { NEWS_CATEGORIES } from "@/lib/news-categories";
 import type { Dictionary } from "@/lib/i18n";
 
 type NewsPost = {
@@ -19,10 +20,10 @@ type NewsPost = {
   publishedAt: Date | null;
 };
 
-const PAGE_SIZE = 6;
 const FEATURED = 4;
+const AUTO_MS = 5000;
 const EASE = [0.16, 1, 0.3, 1] as const;
-// Category badge colors, in Figma order.
+// badge colors per tab, Figma order
 const BADGE_COLORS = ["bg-green", "bg-orange", "bg-blue", "bg-red"];
 
 function formatDate(date: Date) {
@@ -75,7 +76,7 @@ function ShareButton({ post, labels }: { post: NewsPost; labels: { share: string
 
 /**
  * News list (Figma "News landing page"): a slider of the newest posts, then
- * category pills over a paged grid of post cards.
+ * category pills over a horizontal row of post cards.
  */
 export function NewsExplorer({
   posts,
@@ -90,29 +91,24 @@ export function NewsExplorer({
   notice?: ReactNode;
   showFeatured?: boolean;
 }) {
-  const categories = useMemo(() => Array.from(new Set(posts.map((p) => p.category))), [posts]);
-  const badge = (category: string) => BADGE_COLORS[categories.indexOf(category) % BADGE_COLORS.length];
+  const badge = (category: string) => BADGE_COLORS[(NEWS_CATEGORIES as readonly string[]).indexOf(category)] ?? "bg-blue";
+  const label = (category: string) => dict.categories[category] ?? category;
   const [active, setActive] = useState<string | null>(null);
-  const [page, setPage] = useState(0);
   const [slide, setSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
   const shareLabels = { share: dict.share, linkCopied: dict.linkCopied };
-  const listTop = useRef<HTMLDivElement>(null);
 
   const featured = showFeatured ? posts.slice(0, FEATURED) : [];
   const filtered = active ? posts.filter((p) => p.category === active) : posts;
-  const pages = Math.ceil(filtered.length / PAGE_SIZE);
-  const shown = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const current = featured[slide];
+  const nextSlide = () => setSlide((s) => (s + 1) % featured.length);
 
-  function goToPage(next: number) {
-    setPage(next);
-    listTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  function selectTab(tab: string | null) {
-    setActive(tab);
-    setPage(0);
-  }
+  // auto-advance, restarts after each change
+  useEffect(() => {
+    if (paused || featured.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setTimeout(() => setSlide((s) => (s + 1) % featured.length), AUTO_MS);
+    return () => clearTimeout(id);
+  }, [slide, paused, featured.length]);
 
   function pill(label: string, value: string | null) {
     const isActive = active === value;
@@ -122,7 +118,7 @@ export function NewsExplorer({
         role="tab"
         type="button"
         aria-selected={isActive}
-        onClick={() => selectTab(value)}
+        onClick={() => setActive(value)}
         className={`shrink-0 rounded-full border px-5 py-2 text-sm font-semibold press ${
           isActive ? "border-navy bg-navy text-white" : "border-navy/25 bg-white hover:border-navy"
         }`}
@@ -146,7 +142,13 @@ export function NewsExplorer({
 
       {/* Featured slider */}
       {current && (
-        <div className="mx-auto mt-12 max-w-5xl md:mt-16">
+        <div
+          className="relative mx-auto mt-12 max-w-5xl md:mt-16"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocus={() => setPaused(true)}
+          onBlur={() => setPaused(false)}
+        >
           <AnimatePresence mode="wait" initial={false}>
             <motion.article
               key={current.id}
@@ -171,7 +173,7 @@ export function NewsExplorer({
                   {dict.feature}
                 </span>
                 <span className={`self-start rounded-full px-3 py-0.5 text-xs font-bold text-white ${badge(current.category)}`}>
-                  {current.category}
+                  {label(current.category)}
                 </span>
                 <h2 className="mt-4 font-body text-xl font-bold uppercase leading-snug md:text-2xl">
                   <Link href={`/news/${current.slug}`} className="hover:text-navy/75">
@@ -197,6 +199,16 @@ export function NewsExplorer({
             </motion.article>
           </AnimatePresence>
           {featured.length > 1 && (
+            <button
+              type="button"
+              onClick={nextSlide}
+              aria-label={dict.nextStory}
+              className="press absolute right-0 top-1/2 z-10 hidden size-12 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-navy text-white shadow-md hover:bg-blue md:flex lg:translate-x-[calc(100%+1rem)]"
+            >
+              <ArrowRight size={22} weight="bold" />
+            </button>
+          )}
+          {featured.length > 1 && (
             <div className="mt-6 flex justify-center gap-2">
               {featured.map((post, i) => (
                 <button
@@ -214,22 +226,20 @@ export function NewsExplorer({
       )}
 
       {/* Latest news */}
-      <div ref={listTop} className="mt-20 flex scroll-mt-32 flex-col gap-6 md:mt-24 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mt-20 flex flex-col gap-6 md:mt-24 lg:flex-row lg:items-center lg:justify-between">
         <h2 className="font-display text-3xl font-bold md:text-4xl">{dict.latestNews}</h2>
-        {categories.length > 1 && (
-          <div role="tablist" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] md:gap-3">
-            {pill(dict.filterAll, null)}
-            {categories.map((c) => pill(c, c))}
-          </div>
-        )}
+        <div role="tablist" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] md:gap-3">
+          {pill(dict.filterAll, null)}
+          {NEWS_CATEGORIES.map((c) => pill(label(c), c))}
+        </div>
       </div>
 
       {filtered.length === 0 ? (
         <p className="mt-10 text-navy/60">{dict.emptyCategory}</p>
       ) : (
-        <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-8">
-          {shown.map((post, i) => (
-            <li key={post.id}>
+        <ScrollRow key={active} className="mt-10 gap-6 md:gap-8" labels={{ prev: dict.prevNews, next: dict.nextNews }}>
+          {filtered.map((post, i) => (
+            <li key={post.id} className="w-[85%] shrink-0 snap-start py-1 sm:w-[calc((100%-1.5rem)/2)] md:w-[calc((100%-2rem)/2)] lg:w-[calc((100%-4rem)/3)]">
               <Reveal scroll={(i % 3) * 0.12} className="h-full">
                 <article className="group flex h-full flex-col rounded-2xl bg-white p-3 shadow-[0_18px_40px_-28px_rgb(5_19_59/0.55)] ring-1 ring-navy/10 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1">
                   <Link href={`/news/${post.slug}`} tabIndex={-1} aria-hidden className="relative block aspect-square overflow-hidden rounded-xl bg-paper">
@@ -243,7 +253,7 @@ export function NewsExplorer({
                       />
                     )}
                     <span className={`absolute right-3 top-3 rounded-full px-3 py-0.5 text-xs font-bold text-white ${badge(post.category)}`}>
-                      {post.category}
+                      {label(post.category)}
                     </span>
                   </Link>
                   <div className="flex flex-1 flex-col px-2 pb-2 pt-4">
@@ -273,15 +283,8 @@ export function NewsExplorer({
               </Reveal>
             </li>
           ))}
-        </ul>
+        </ScrollRow>
       )}
-
-      <Pagination
-        page={page}
-        pages={pages}
-        onChange={goToPage}
-        labels={{ page: dict.page, previous: dict.previous, next: dict.next }}
-      />
     </>
   );
 }

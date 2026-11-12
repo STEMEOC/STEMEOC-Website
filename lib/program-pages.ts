@@ -54,6 +54,8 @@ export type Winners = {
   groups: WinnerGroup[];
   /** Award-ceremony photos. */
   photos?: Photo[];
+  /** Each award given and who presented it. */
+  awards?: { name: string; presenter: string }[];
 };
 
 /** One edition of a program (CRO 2025, the 18th STEM Festival...). Each gets
@@ -82,6 +84,8 @@ export type ProgramEvent = {
   reportUrl?: string;
   /** Teams or entries per category, for the participation bars. */
   participation?: { category: string; count: number }[];
+  /** What the participation counts are. */
+  participationUnit?: "people" | "teams";
   /** Show the program's competition categories (with Register buttons). */
   showCategories?: boolean;
   winners?: Winners;
@@ -228,6 +232,19 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
           "CRO categories: Robot Tug of War, Robot Sumo, Robot Soccer",
           "WRO categories: Future Innovators, Future Engineers, RoboMission",
           "Winners represent Cambodia at WRO 2026",
+        ],
+        // CRO&WRO2026-TeamList.pdf (STEM TEAM drive); registered teams, Robot Soccer not in the list
+        stats: [
+          { value: "106", label: "Registered teams" },
+          { value: "5", label: "Categories" },
+        ],
+        participationUnit: "teams",
+        participation: [
+          { category: "Robot Sumo", count: 42 },
+          { category: "Robot Tug of War", count: 24 },
+          { category: "Future Innovators", count: 20 },
+          { category: "RoboMission", count: 13 },
+          { category: "Future Engineers", count: 7 },
         ],
         image: "/uploads/707646851_1405230371650624_3445541354606307499_n.jpg",
         imageContain: true,
@@ -382,6 +399,19 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
           "Winners announced 11 September 2025",
           "WRO International Final: Singapore, 26–28 November 2025",
         ],
+        // CRO 2025 Report (STEM TEAM drive)
+        stats: [
+          { value: "624", label: "Participants" },
+          { value: "79", label: "Teams" },
+          { value: "32", label: "Schools & universities" },
+          { value: "25", label: "Winning teams" },
+        ],
+        participationUnit: "people",
+        participation: [
+          { category: "WRO categories", count: 102 },
+          { category: "National categories", count: 71 },
+          { category: "VEX IQ", count: 14 },
+        ],
         image: "/uploads/events/cro-2025/01.jpg",
         photos: [
           { src: "/uploads/events/cro-2025/venue-stage.jpg", alt: "The CRO 2025 stage set up at AEON Hall, AEON Mall Mean Chey" },
@@ -448,18 +478,23 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
         slug: "2024",
         year: "2024",
         video: "Ouj-iHiXBrQ",
-        date: "September 2024",
+        date: "14 September 2024",
+        venue: "AEON Mall Mean Chey (1st floor)",
         title: "Cambodia Robotics Olympiad 2024",
         summary:
           "More than 200 students competed across five categories in front of over 900 visitors. Winners represented Cambodia at WRO 2024 in İzmir, Türkiye.",
         body: [
-          "CRO 2024 brought more than 200 students together to compete in RoboMission, Future Innovators, Future Engineers, Robot Sumo and Robot Soccer, watched by over 900 visitors.",
-          "Alongside the competition, a Robotics Expo gave visitors hands-on activities and the chance to meet professionals and companies working in robotics. The winning teams went on to the World Robot Olympiad 2024 in İzmir, Türkiye, on 28–30 November 2024.",
+          "Under the theme \"Earth Allies\", CRO 2024 brought more than 200 students together to compete in RoboMission, Future Innovators, Future Engineers, Robot Sumo and Robot Soccer, watched by over 900 visitors. The event was supported by the Ministry of Education, Youth and Sport and the Ministry of Environment.",
+          "Alongside the competition, a Robotics Expo, the ECO Hero Academy and an Interactive Zone gave visitors hands-on activities and the chance to meet professionals and companies working in robotics.",
+          "Two AUPP High School teams went on to represent Cambodia at the WRO 2024 International Final at Fuar İzmir, Türkiye, among 85 countries. Team Charlie Brown placed 21st of 48 countries in Future Innovators Senior, and Team Snoopy placed 28th of 50 in Future Engineers.",
         ],
         highlights: [
+          "Theme: Earth Allies",
           "Five categories: RoboMission, Future Innovators, Future Engineers, Robot Sumo, Robot Soccer",
-          "Robotics Expo with industry exhibitors",
+          "Robotics Expo, ECO Hero Academy and Interactive Zone",
           "WRO 2024 International Final: İzmir, Türkiye, 28–30 November 2024",
+          "Team Charlie Brown: 21st of 48 in Future Innovators Senior",
+          "Team Snoopy: 28th of 50 in Future Engineers",
         ],
         stats: [
           { value: "200+", label: "Students competing" },
@@ -483,6 +518,87 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
           ],
         },
       },
+      {
+        // WRO Cambodia 2023 - Winners.docx + Winners 17th ACSF & WRO 2023.docx (STEM TEAM drive)
+        slug: "2023",
+        year: "2023",
+        date: "16 September 2023",
+        title: "WRO Cambodia 2023",
+        venue: "CamTech University",
+        summary:
+          "The Cambodia round of the World Robot Olympiad 2023, where teams competed in Future Innovators, Future Engineers and RoboMission.",
+        body: [
+          "STEMEOC's 2023 national robotics round ran as WRO Cambodia at CamTech University, with teams competing across the three WRO categories in elementary, junior and senior divisions.",
+          "Team Ro-Boat from AUPP High School–Foxcroft Academy, winners of the senior Future Innovators category, built and tested their robot at CamTech before flying out to represent Cambodia at the WRO 2023 International Final in Panama, where they won the Best Start-up Idea Award.",
+        ],
+        highlights: [
+          "Theme: Connecting the World",
+          "WRO categories: Future Innovators, Future Engineers, RoboMission",
+          "Elementary, junior and senior divisions",
+          "Team Ro-Boat: Best Start-up Idea Award at the WRO 2023 International Final, Panama",
+        ],
+        image: "/uploads/events/cro-2023/01.jpg",
+        // Team Ro-Boat - WRO International Round 2023 + WRO 2023 Winners - Panama folders (STEM TEAM drive)
+        photos: [
+          { src: "/uploads/events/cro-2023/panama-award.jpg", alt: "Team Ro-Boat on stage with the Cambodian flag at the WRO 2023 International Final in Panama" },
+          { src: "/uploads/events/cro-2023/panama-booth.jpg", alt: "Team Ro-Boat at their booth at the WRO 2023 International Final in Panama" },
+          { src: "/uploads/events/cro-2023/roboat-team.jpg", alt: "Team Ro-Boat and their mentors with the finished robot at CamTech" },
+          { src: "/uploads/events/cro-2023/roboat-build-1.jpg", alt: "Team Ro-Boat programming their robot before the WRO 2023 final" },
+          { src: "/uploads/events/cro-2023/roboat-build-2.jpg", alt: "A Team Ro-Boat member assembling the robot's frame" },
+          { src: "/uploads/events/cro-2023/roboat-departure.jpg", alt: "Team Ro-Boat at the airport, leaving for the WRO 2023 final in Panama" },
+        ],
+        winners: {
+          // WRO 2023 - Winners photo folder (STEM TEAM drive)
+          photos: Array.from({ length: 11 }, (_, i) => ({
+            src: `/uploads/events/cro-2023/${String(i + 1).padStart(2, "0")}.jpg`,
+            alt: "Winning team with their medals and certificates on stage at WRO Cambodia 2023",
+          })),
+          groups: [
+            {
+              category: "Future Innovators",
+              division: "Senior",
+              teams: [
+                { name: "Ro-Boat", place: "1st place", school: "AUPP High School–Foxcroft Academy", members: ["Sam Vatanak", "Sreng Chhayly", "Te Senglong"] },
+                { name: "Cloud-Teach", place: "2nd place", members: ["Sothea Panhaseth", "Pech Sovannroth"] },
+                { name: "Emperor", place: "3rd place", school: "Happy Chandara School", members: ["Heng LimHeang", "Kong Socheat", "Lann Lapi"] },
+              ],
+            },
+            {
+              category: "Future Innovators",
+              division: "Junior",
+              teams: [{ name: "Plan Tech", place: "1st place", members: ["Soung Sereykol", "Tech Puthearath"] }],
+            },
+            {
+              category: "Future Innovators",
+              division: "Elementary",
+              teams: [{ name: "Tidy Boat", place: "1st place", members: ["Hun Heng Kimlong", "Cheng Vachan Marian", "Mey Monipanha"] }],
+            },
+            {
+              category: "Future Engineers",
+              division: "Senior",
+              teams: [{ name: "Inventronix", place: "1st place", members: ["Tann Sunlay", "Mey Sophearith"] }],
+            },
+            {
+              category: "RoboMission",
+              division: "Senior",
+              teams: [
+                { name: "Never Gonna Lego", place: "1st place", school: "Canadian International School", members: ["Greyson", "Luca"] },
+                { name: "Angkorian", place: "2nd place", school: "Neeson Cripps Academy", members: ["Suon Sokchea", "Ol Sreynin"] },
+                { name: "Aeries", place: "3rd place", members: ["San Lida", "Chheav Sotsokhphavy", "Hong Malen"] },
+              ],
+            },
+            {
+              category: "RoboMission",
+              division: "Junior",
+              teams: [
+                { name: "Titan JSS", place: "1st place", members: ["Siewling Im", "Jing Jing Ngau", "Sanika Eang"] },
+                { name: "Hydro", place: "2nd place", members: ["Son Kanya", "Sim Srey Roattana", "Sok Dannet"] },
+                { name: "Bot Tonix", place: "3rd place", members: ["Sak Kenchankaklika", "Chorn Sereyvicharaday", "Sim Sereyroattanak"] },
+              ],
+            },
+          ],
+        },
+      },
     ],
   },
 
@@ -495,7 +611,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       "The Annual Cambodia STEM Festival is a national event that showcases innovative student projects, interactive exhibits and workshops, inspiring young people to explore how science, technology, engineering and math can shape Cambodia's future. Each edition has its own theme, from green innovation to patterns and programming, with a STEM project exhibition, STEM performances, an art contest, robotics and ECO-STEM zones, a STEAM career fair and a kids zone. Entry is free and open to everyone.",
     overviewImage: "/uploads/STEMFest2026-49.jpg",
     stats: [
-      { value: "13,000", label: "Visitors in 2026" },
+      { value: "13,270", label: "Visitors in 2026" },
       { value: "200+", label: "Student projects" },
       { value: "10,000+", label: "Plastic items saved (2024)" },
     ],
@@ -551,23 +667,35 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
         title: "Annual Cambodia STEM Festival 2026",
         venue: "The Premier Centre Sen Sok, Halls D, E, F & G",
         summary:
-          "Themed \"Patterns and Programming: Discovering Math, Games, and Creativity through STEM\". About 13,000 students, educators, families and visitors came through the doors.",
+          "Themed \"Patterns and Programming: Discovering Math, Games, and Creativity through STEM\". 13,270 students, educators, families and visitors from 81 schools came through the doors.",
         body: [
           "The 2026 festival explored the theme \"Patterns and Programming: Discovering Math, Games, and Creativity through STEM\". Students from schools across the country showcased projects, competed in challenges and took part in STEM initiatives across four halls of The Premier Centre Sen Sok.",
           "Schools and students could take part in three ways: the STEM Project Exhibition, STEM Performances, and the Primary School Art Contest. The art contest, themed \"The Art of Patterns: Tessellations\", had two divisions (grades 1–3 and grades 4–6), with A3 individual entries due on 23 January and results announced at the festival.",
           "Entry was free for schools, families, students, ministries, private-sector partners, NGOs and the general public.",
         ],
         highlights: [
-          "Around 250 STEM projects and 1,000 creative exhibits",
+          "338 STEM projects and 531 art posters on display",
           "Robotics, ECO-STEM, interactive learning and kids zones",
           "STEAM Career Fair",
           "Performances, quizzes and competitions",
           "Primary School Art Contest: \"The Art of Patterns: Tessellations\"",
         ],
+        // ACSF 2026 Report (STEM TEAM drive)
         stats: [
-          { value: "13,000", label: "Visitors" },
-          { value: "250", label: "STEM projects" },
-          { value: "1,000", label: "Creative exhibits" },
+          { value: "13,270", label: "Attendees" },
+          { value: "81", label: "Schools" },
+          { value: "338", label: "STEM projects" },
+          { value: "531", label: "Art posters" },
+        ],
+        participationUnit: "people",
+        participation: [
+          { category: "Students", count: 7000 },
+          { category: "Parents & visitors", count: 4500 },
+          { category: "Exhibitors & supervisors", count: 1080 },
+          { category: "Partners & sponsors", count: 250 },
+          { category: "STEM performers", count: 210 },
+          { category: "Volunteers & team", count: 130 },
+          { category: "Online registrations", count: 100 },
         ],
         image: "/uploads/events/festival-2026/01.jpg",
         photos: [
@@ -639,9 +767,66 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
         image: "/uploads/events/festival-2023/poster.jpg",
         imageContain: true,
         body: [
-          "At the 17th festival, held at The Premier Centre Sen Sok, students from schools across Cambodia showcased their creative projects in science, technology, engineering, arts and mathematics.",
-          "Visitors also met STEMEOC's wider programs, including STEM Sisters and robotics, and the Soap Up and Beat Plastic campaigns.",
+          "At the 17th festival, held at The Premier Centre Sen Sok under the theme \"Cambodia 4.0\", students from 24 schools showcased 207 projects in science, technology, engineering, arts and mathematics. With support from the Ministry of Education, Youth and Sport, more than 2,500 public school students were brought to the venue by bus.",
+          "Visitors tried XR/VR, drones, 3D printing, robotics and AI first hand, joined STEM Talks on careers, aviation, robotics and the environment, and made 3D-pen art and soap in the kids zone. STEMEOC also ran its first hybrid Super Brain math contest: 4,400 students sat two online rounds, and the top 1,000 took the final exam at the festival.",
+          "Gender equality ran through the event: every exhibition team needed at least one girl, every Robot Sumo team at least one female member, and 63% of the 197 volunteers were women.",
         ],
+        highlights: [
+          "Theme: Cambodia 4.0",
+          "207 STEM projects from 24 schools",
+          "Robot Sumo Challenge: 54 teams, 108 students, half of them girls",
+          "Super Brain math contest: 4,400 students",
+          "11 STEM Talk speakers, half of them women",
+          "58 sponsors and partners",
+          "122,000+ people reached online",
+        ],
+        // Report STEM17.pdf (STEM TEAM drive)
+        stats: [
+          { value: "13,000", label: "Visitors" },
+          { value: "207", label: "STEM projects" },
+          { value: "24", label: "Schools" },
+          { value: "197", label: "Volunteers" },
+        ],
+        participationUnit: "people",
+        participation: [
+          { category: "Super Brain math contest", count: 4400 },
+          { category: "Public school students by bus", count: 2500 },
+          { category: "XR/VR corner", count: 1000 },
+          { category: "Kids workshops", count: 400 },
+          { category: "Volunteers", count: 197 },
+          { category: "Robot Sumo competitors", count: 108 },
+        ],
+        // Winners 17th ACSF & WRO 2023.docx (STEM TEAM drive)
+        winners: {
+          groups: [
+            {
+              category: "Robot Sumo: Non-Lego",
+              division: "Senior",
+              teams: [
+                { name: "Imposter", place: "1st place", school: "E2STEM Education" },
+                { name: "Travel to Technology", place: "2nd place", school: "Westline School STM" },
+                { name: "Split Bot", place: "3rd place", school: "EYC – Aziza" },
+              ],
+            },
+            {
+              category: "Robot Sumo: Non-Lego",
+              division: "Junior",
+              teams: [
+                { name: "The Unknown", place: "1st place", school: "Dewey International School – BMC Campus" },
+                { name: "Cassia Virtual", place: "2nd place", school: "Westline School" },
+                { name: "SZ Heroes", place: "3rd place", school: "Westline School Chbar Ampov" },
+              ],
+            },
+            {
+              category: "Robot Sumo: Lego",
+              teams: [
+                { name: "Eminem", place: "1st place", school: "Canadian International School" },
+                { name: "Wo Mei You Qian", place: "2nd place", school: "Canadian International School" },
+                { name: "Zombeat", place: "3rd place", school: "Neeson Cripps Academy" },
+              ],
+            },
+          ],
+        },
       },
       {
         slug: "2021",
@@ -720,7 +905,15 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
         stats: [
           { value: "27", label: "Countries" },
           { value: "33", label: "National selections" },
+          { value: "1,550", label: "Visitors" },
           { value: "3", label: "Days" },
+        ],
+        // ICIA 2026 Global Round Report (STEM TEAM drive), teams per category
+        participationUnit: "teams",
+        participation: [
+          { category: "Innovation Award", count: 76 },
+          { category: "Innovation Challenge", count: 40 },
+          { category: "Startup", count: 20 },
         ],
         image: "/uploads/events/icia-2026/01.jpg",
         photos: [
@@ -783,6 +976,18 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
               ],
             },
           ],
+          // Awards List - ICIA 2026.xlsx (STEM TEAM drive)
+          awards: [
+            { name: "Top 10: Designing Waste-Free Learning Spaces", presenter: "LCT. Oeurn Panchakneath, Undersecretary of State, Ministry of Environment" },
+            { name: "Top 10: AI to solve real learning problems", presenter: "Dr. Songheang Ai, Director of SEAMEO TED" },
+            { name: "Appreciation Award: Most Innovative School", presenter: "Mr. Antonius Malem Barus, CEO of Krya Global and ICIA Initiator" },
+            { name: "Innovation Challenge: Titanium Award", presenter: "Dr. Umawathy Techanamurthy and Daryl Lim" },
+            { name: "Innovation Award: Titanium Award", presenter: "Mr. Krishnajie, Chargé d'affaires of the Republic of Indonesia in Phnom Penh" },
+            { name: "Grand Award: Innovation Challenge", presenter: "Ms. Eang Nithijounie Dene" },
+            { name: "Grand Award: Innovation Award", presenter: "H.E. Dr. Kim Sethany" },
+            { name: "StartUp Exchange: Grand Award", presenter: "H.E. Mr. Marcos dos Reis da Costa, Ambassador of Timor-Leste to Cambodia" },
+            { name: "TeachME Award: Top 3", presenter: "H.E. Dr. Hang Chuon Naron" },
+          ],
         },
       },
       {
@@ -797,6 +1002,19 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
           "The national selection took place on 14 March 2026. Teams that stood out went on to the Global Round in Phnom Penh on 24–26 April.",
         ],
         highlights: ["Registration fee: $10 per team", "Global Round: Phnom Penh, 24–26 April 2026"],
+        // ICIA 2026 National Selection Report (STEM TEAM drive)
+        stats: [
+          { value: "176", label: "Teams" },
+          { value: "455", label: "Attendees" },
+          { value: "60", label: "Winners" },
+          { value: "19", label: "Volunteers" },
+        ],
+        participationUnit: "teams",
+        participation: [
+          { category: "Innovation Award", count: 79 },
+          { category: "Inventor Wannabe", count: 61 },
+          { category: "Innovation Challenge", count: 36 },
+        ],
         image: "/uploads/625262244_1310935147746814_8225481027416273051_n.jpg",
         imageContain: true,
         photos: [

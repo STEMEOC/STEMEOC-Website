@@ -23,6 +23,11 @@ export function TeamCard({ team, tone }: { team: WinnerTeam; tone: string }) {
 
   return (
     <article className="group flex h-full flex-col rounded-2xl bg-white p-5 text-navy shadow-[0_24px_50px_-32px_rgb(0_0_0/0.8)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 md:p-6">
+      {team.photo && (
+        <span className="relative -mx-2 -mt-2 mb-5 block aspect-[3/2] overflow-hidden rounded-xl bg-paper md:-mx-3 md:-mt-3">
+          <Image src={team.photo} alt={title ?? ""} fill sizes="(max-width: 640px) 100vw, 400px" className="object-cover" />
+        </span>
+      )}
       <div className="flex items-start gap-4">
         {logo ? (
           <span className="relative size-14 shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-navy/10">

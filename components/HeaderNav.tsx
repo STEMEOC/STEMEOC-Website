@@ -234,9 +234,10 @@ export function HeaderNav({ locale, links, labels }: HeaderNavProps) {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <div className="flex items-center gap-3 md:gap-5">
+    <div className="flex flex-1 items-center gap-3 md:gap-5">
       {/* Desktop links and the search bar that expands over them */}
-      <div className="relative flex items-center">
+      {/* side padding = right-side icons minus logo width, so the links sit on the bar's center */}
+      <div className="relative flex flex-1 items-center justify-end xl:justify-center xl:pl-12 xl:pr-[4.25rem]">
         <nav
           aria-label="Main"
           inert={searchOpen}
@@ -260,7 +261,7 @@ export function HeaderNav({ locale, links, labels }: HeaderNavProps) {
         </nav>
 
         {/* Holds the collapsed search button's place in the row */}
-        <span aria-hidden className="size-11 shrink-0 lg:ml-6" />
+        <span aria-hidden className="size-11 shrink-0 lg:ml-6 xl:absolute xl:right-0 xl:ml-0" />
 
         <form
           ref={searchForm}

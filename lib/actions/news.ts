@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { invalidateTag } from "@/lib/cache";
 import { resolveImageField } from "@/lib/uploads";
 import { auth } from "@/auth";
+import { DEFAULT_NEWS_CATEGORY, NEWS_CATEGORIES } from "@/lib/news-categories";
 
 const NewsSchema = z.object({
   title: z.string().trim().min(1).max(300),
@@ -19,6 +20,7 @@ const NewsSchema = z.object({
   excerpt: z.string().trim().min(1).max(500),
   body: z.string().trim().min(1),
   coverImageUrl: z.string().trim().max(500),
+  category: z.enum([DEFAULT_NEWS_CATEGORY, ...NEWS_CATEGORIES]).catch(DEFAULT_NEWS_CATEGORY),
   published: z.coerce.boolean(),
 });
 
@@ -39,6 +41,7 @@ export async function createNews(formData: FormData) {
     excerpt: formData.get("excerpt"),
     body: formData.get("body"),
     coverImageUrl: await resolveImageField(formData, "coverImageUrl", "news"),
+    category: formData.get("category"),
     published: formData.get("published") === "on",
   });
 
@@ -62,6 +65,7 @@ export async function updateNews(id: string, formData: FormData) {
     excerpt: formData.get("excerpt"),
     body: formData.get("body"),
     coverImageUrl: await resolveImageField(formData, "coverImageUrl", "news"),
+    category: formData.get("category"),
     published: formData.get("published") === "on",
   });
 

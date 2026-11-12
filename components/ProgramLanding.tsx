@@ -8,7 +8,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { StatBoxes } from "@/components/StatBoxes";
 import { PastEvents } from "@/components/PastEvents";
 import { AboutTabs } from "@/components/AboutTabs";
-import { ProjectsBand } from "@/components/ProjectsBand";
+import { MoreProjects } from "@/components/MoreProjects";
 import { QuestionsBand } from "@/components/QuestionsBand";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { HighlightReel } from "@/components/HighlightReel";
@@ -29,7 +29,6 @@ export function ProgramLanding({
   program,
   page,
   logo,
-  logoMono,
   others,
   gallery,
   dict,
@@ -37,8 +36,6 @@ export function ProgramLanding({
   program: Program;
   page: ProgramPage;
   logo: string | null;
-  /** Logo is one dark color; shown white on the navy hero. */
-  logoMono: boolean;
   others: Program[];
   gallery: ReactNode;
   dict: Dictionary;
@@ -151,7 +148,7 @@ export function ProgramLanding({
       )}
 
       {events.some((e) => e.video) && (
-        <section className="bg-paper py-16 md:py-24">
+        <section className="bg-white py-16 md:py-24">
           <div className="container-site">
             <Reveal className="mb-10 text-center md:mb-14">
               <p className="text-sm font-semibold text-red md:text-base">{f.watch}</p>
@@ -171,17 +168,17 @@ export function ProgramLanding({
   return (
     <>
       {/* Hero */}
-      <section className="-mt-(--header-h) bg-navy pt-(--header-h) text-white">
+      <section className="-mt-(--header-h) bg-paper pt-(--header-h) text-navy">
         <div className="container-site grid items-center gap-10 pb-32 pt-14 md:pb-36 md:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:pt-24">
           <Reveal>
             <h1 className="max-w-2xl font-display text-3xl font-bold uppercase leading-tight md:text-5xl">
               {page.heroTitle ?? program.title}
             </h1>
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/90 md:text-lg">{page.summary}</p>
+            <p className="mt-6 max-w-2xl text-base leading-relaxed text-navy/85 md:text-lg">{page.summary}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/projects"
-                className="group inline-flex h-11 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-navy press hover:-translate-y-0.5 hover:bg-paper"
+                className="group inline-flex h-11 items-center gap-2 rounded-full border border-navy/20 bg-white px-6 text-sm font-bold text-navy press hover:-translate-y-0.5"
               >
                 {dict.home.landing.exploreAllPrograms}
                 <ArrowRight size={16} weight="bold" className="transition-transform duration-300 group-hover:translate-x-0.5" />
@@ -196,14 +193,7 @@ export function ProgramLanding({
           </Reveal>
           {logo && (
             <Reveal delay={0.15} className="flex justify-center lg:justify-end">
-              {logoMono ? (
-                <Image src={logo} alt={program.title} width={900} height={400} priority className="h-auto max-h-64 w-full max-w-md object-contain brightness-0 invert" />
-              ) : (
-                // Logo text is navy, so it sits on a white panel
-                <div className="w-full max-w-md rounded-2xl bg-white p-6 md:p-8">
-                  <Image src={logo} alt={program.title} width={900} height={400} priority className="h-auto max-h-56 w-full object-contain" />
-                </div>
-              )}
+              <Image src={logo} alt={program.title} width={900} height={400} priority className="h-auto max-h-56 w-full max-w-md object-contain" />
             </Reveal>
           )}
         </div>
@@ -213,6 +203,7 @@ export function ProgramLanding({
       <div className="relative z-10 -mt-20 md:-mt-24">
         <AboutTabs
           light
+          activeTone={accent.bg}
           tabs={[
             { id: "overview", label: f.eventOverview, content: overview },
             { id: "gallery", label: f.gallery, content: gallery },
@@ -220,9 +211,7 @@ export function ProgramLanding({
         />
       </div>
 
-      <div className="pt-8">
-        <ProjectsBand title={t.moreProjects} detailLabel={dict.home.landing.detail} programs={others} />
-      </div>
+      <MoreProjects title={t.moreProjects} detailLabel={dict.home.landing.detail} labels={{ prev: dict.home.landing.prevPrograms, next: dict.home.landing.nextPrograms }} programs={others} />
 
       <QuestionsBand
         title={dict.footer.questions.title}

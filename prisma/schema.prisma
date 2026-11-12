@@ -183,3 +183,12 @@ model FormSubmission {
 
   @@index([formId, createdAt])
 }
+
+// internal dataset uploads, keyed "programSlug/eventSlug"
+model EventDataset {
+  key        String   @id
+  rows       Json
+  fileName   String
+  uploadedBy String?
+  updatedAt  DateTime @updatedAt
+}

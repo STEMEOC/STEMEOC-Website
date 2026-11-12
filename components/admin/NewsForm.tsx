@@ -1,5 +1,6 @@
 import { ImageField } from "@/components/admin/ImageField";
 import type { NewsPost } from "@prisma/client";
+import { DEFAULT_NEWS_CATEGORY, NEWS_CATEGORIES } from "@/lib/news-categories";
 
 export function NewsForm({
   action,
@@ -55,6 +56,20 @@ export function NewsForm({
           required
           className="mt-2 w-full rounded-lg border border-ink/15 bg-paper px-4 py-3 text-sm outline-none focus:border-blue"
         />
+      </div>
+
+      <div>
+        <label htmlFor="category" className="text-sm font-medium">Category</label>
+        <select
+          id="category"
+          name="category"
+          defaultValue={post?.category ?? DEFAULT_NEWS_CATEGORY}
+          className="mt-2 w-full rounded-lg border border-ink/15 bg-paper px-4 py-3 text-sm outline-none focus:border-blue"
+        >
+          {[DEFAULT_NEWS_CATEGORY, ...NEWS_CATEGORIES].map((c) => (
+            <option key={c} value={c}>{c === DEFAULT_NEWS_CATEGORY ? "News (no tab)" : c}</option>
+          ))}
+        </select>
       </div>
 
       <ImageField name="coverImageUrl" label="Cover image" defaultValue={post?.coverImageUrl} />

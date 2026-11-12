@@ -138,7 +138,6 @@ export default async function ProgramPage({ params }: PageProps<"/projects/[slug
           program={program}
           page={page}
           logo={logo}
-          logoMono={programLogoIsMonochrome(program)}
           others={others}
           gallery={gallery}
           dict={dict}

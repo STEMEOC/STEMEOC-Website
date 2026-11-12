@@ -104,16 +104,20 @@ html:lang(km) :is(.leading-none, .leading-tight, .leading-snug, .leading-\[1\.05
 }
 
 /* Page gutter: the side margin grows with the screen, from 20px on phones
-   to ~100px on wide screens (the Figma frames are 1920 wide with 100px side
-   margins). It lives in --gutter so pieces that bleed to the screen edge on
-   small screens (-mx-(--gutter) px-(--gutter)) or snap to it
-   (scroll-px-(--gutter)) always match. */
+   to 200px on a 1920 screen (Figma review: 200px side margins). It lives in
+   --gutter so pieces that bleed to the screen edge on small screens
+   (-mx-(--gutter) px-(--gutter)) or snap to it (scroll-px-(--gutter)) always match. */
 @utility container-site {
-  --gutter: clamp(1.25rem, 5vw, 7rem);
+  --gutter: clamp(1.25rem, 13vw - 3.1rem, 12.5rem);
   margin-inline: auto;
   width: 100%;
-  max-width: 1440px;
+  max-width: 1920px;
   padding-inline: var(--gutter);
+}
+
+/* Shared vertical rhythm between page sections. */
+@utility section-y {
+  padding-block: clamp(4rem, 8vw, 9rem);
 }
 
 /* The slanted edge that joins a navy block to the white area beside it.

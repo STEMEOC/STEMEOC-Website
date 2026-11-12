@@ -29,7 +29,7 @@ export function PhotoStack({ photos, label }: { photos: Photo[]; label: string }
       className="group relative block w-full cursor-pointer text-left disabled:cursor-default"
       style={{ paddingRight: pad, paddingBottom: pad }}
     >
-      <span className="relative block aspect-[3/2]">
+      <span className="relative block aspect-[4/5]">
         {stack.map((photo, i) => {
           const s = spot(i);
           return (
@@ -45,7 +45,7 @@ export function PhotoStack({ photos, label }: { photos: Photo[]; label: string }
                 alt={s === 0 ? photo.alt : ""}
                 fill
                 quality={90}
-                sizes="(max-width: 1024px) 100vw, 640px"
+                sizes="(max-width: 1024px) 100vw, 448px"
                 className={`object-cover transition-[filter] duration-500 ${s === 0 ? "" : "brightness-75"}`}
               />
             </motion.span>
