@@ -224,7 +224,7 @@ export default async function HomePage() {
 
       {/* Featured team member */}
       {featured && (
-        <section className="relative overflow-hidden bg-navy py-16 text-white md:py-24">
+        <section className="relative flex min-h-[44rem] items-center overflow-hidden bg-navy py-20 text-white md:py-32 lg:py-40">
           <Image
             src="/brand/logo-mark.png"
             alt=""
@@ -232,7 +232,7 @@ export default async function HomePage() {
             height={395}
             className="pointer-events-none absolute -bottom-40 -right-40 w-[32rem] animate-[spin_60s_linear_infinite] opacity-10 motion-reduce:animate-none md:-bottom-56 md:-right-56 md:w-[44rem]"
           />
-          <div className="container-site relative grid items-center gap-12 md:grid-cols-[minmax(0,16rem)_1fr] md:gap-16 lg:grid-cols-[minmax(0,20rem)_1fr] lg:gap-24">
+          <div className="container-site relative grid items-center justify-center gap-12 md:grid-cols-[minmax(0,18rem)_minmax(0,42rem)] md:gap-16 lg:grid-cols-[minmax(0,26rem)_minmax(0,46rem)] lg:gap-24">
             <Reveal className="relative mx-auto w-full max-w-xs md:max-w-none">
               <div className="relative">
                 <div aria-hidden className="absolute inset-0 translate-x-4 translate-y-4 rounded-b-[1.5rem] rounded-t-full border-2 border-white/25 md:translate-x-5 md:translate-y-5" />
@@ -243,7 +243,7 @@ export default async function HomePage() {
                       alt={featured.name}
                       fill
                       className="object-cover object-top"
-                      sizes="(max-width: 768px) 320px, 320px"
+                      sizes="(max-width: 768px) 320px, 420px"
                     />
                   )}
                 </div>
@@ -259,7 +259,7 @@ export default async function HomePage() {
               <h2 className="font-display text-4xl font-bold leading-[1.05] md:text-5xl">{featured.name}</h2>
               <p className="mt-3 text-lg font-medium text-orange md:text-xl">{featured.role}</p>
               <span aria-hidden className="mt-8 block h-0.5 w-16 bg-white/30" />
-              <p className="mt-8 max-w-2xl text-base leading-relaxed text-white/85 md:text-lg">{featured.bio}</p>
+              <p className="mt-8 text-base leading-relaxed text-white/85 md:text-lg">{featured.bio}</p>
             </Reveal>
           </div>
         </section>
