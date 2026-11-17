@@ -73,7 +73,7 @@ export default async function ProgramEventPage({ params }: PageProps<"/projects/
           <>
             <Image src={heroPhoto} alt="" fill priority sizes="100vw" className="object-cover" />
             {/* scrim */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgb(5_19_59/0.88),rgb(5_19_59/0.6)_55%,rgb(5_19_59/0.35))]" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgb(5_19_59/0.92),rgb(5_19_59/0.8)_55%,rgb(5_19_59/0.65))]" />
           </>
         )}
         <div
@@ -112,7 +112,7 @@ export default async function ProgramEventPage({ params }: PageProps<"/projects/
           {heroCard && (
             <Reveal delay={0.15} className="flex justify-center lg:justify-end">
               <div
-                className={`relative w-full overflow-hidden rounded-2xl bg-white shadow-[0_24px_50px_-30px_rgb(5_19_59/0.5)] ${
+                className={`relative w-full overflow-hidden rounded-2xl bg-white shadow-[0_10px_30px_rgb(0_0_0/0.18)] ${
                   event.image && !event.imageContain ? "aspect-[4/3] max-w-xl" : "aspect-square max-w-md"
                 }`}
               >
@@ -122,7 +122,7 @@ export default async function ProgramEventPage({ params }: PageProps<"/projects/
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 560px"
-                  className={event.image && !event.imageContain ? "object-cover" : "object-contain p-3"}
+                  className={event.image && !event.imageContain ? "object-cover" : "object-contain"}
                 />
               </div>
             </Reveal>
@@ -133,7 +133,7 @@ export default async function ProgramEventPage({ params }: PageProps<"/projects/
       {/* Key numbers, pulled up over the hero */}
       {event.stats && event.stats.length > 0 && (
         <div className="container-site relative z-10 -mt-14">
-          <StatBoxes stats={event.stats} className="max-w-3xl [&>div]:shadow-[0_18px_40px_-28px_rgb(5_19_59/0.55)]" />
+          <StatBoxes stats={event.stats} className="max-w-3xl [&>div]:border-0 [&>div]:shadow-[0_8px_24px_rgb(5_19_59/0.12)]" />
         </div>
       )}
 

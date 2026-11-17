@@ -97,6 +97,8 @@ export type ProgramEvent = {
 
 export type ProgramPage = {
   heroTitle?: string;
+  /** Photo behind the navy hero. */
+  heroPhoto?: string;
   summary: string;
   whatIsTitle: string;
   whatIs: string;
@@ -894,6 +896,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
     heroTitle: "International Creativity and Innovation Award",
     summary:
       "ICIA is a global competition and learning platform where creativity meets innovation. STEMEOC runs the Cambodia National Selection and hosted the 2026 Global Round in Phnom Penh.",
+    heroPhoto: "/uploads/681978669_1378614724312189_7724845010848517612_n.jpg",
     whatIsTitle: "What is ICIA?",
     whatIs:
       "The International Creativity and Innovation Award (ICIA), initiated by Krya Global and Crebiz Factory, is more than a competition: it is a learning platform where students turn bold ideas into real solutions. STEMEOC brings ICIA to Cambodia in collaboration with the Ministry of Education, Youth and Sports, the Ministry of Tourism and the Ministry of Environment. Students compete in three categories: Inventor Wannabe, Innovation Challenge and Innovation Award.",
@@ -1130,6 +1133,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
 
   "stem-sisters": {
     heroTitle: "STEM Sisters Cambodia",
+    heroPhoto: "/uploads/events/stem-sisters/01.jpg",
     summary:
       "A mentoring program that empowers young Cambodian women to pursue careers in science, technology, engineering and mathematics.",
     whatIsTitle: "What is STEM Sisters?",

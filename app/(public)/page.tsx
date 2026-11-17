@@ -116,7 +116,7 @@ export default async function HomePage() {
               id: "values",
               label: t.tabs.values,
               content: (
-                <div className="bg-navy">
+                <div className="flex min-h-[min(48vw,52rem)] flex-col justify-center bg-navy">
                   <ValuesPanel items={dict.home.pillars.items} />
                 </div>
               ),
@@ -149,7 +149,7 @@ export default async function HomePage() {
 
       {/* Programs */}
       {programs.length > 0 && (
-        <section className="container-site">
+        <section className="container-site pb-[clamp(4rem,8vw,9rem)]">
           <div className="rounded-[2rem] bg-paper px-5 py-12 md:rounded-[3rem] md:p-16 lg:p-20">
             <Reveal className="grid gap-4 md:grid-cols-2 md:items-center md:gap-12">
               <h2 className="font-display text-3xl font-bold md:text-5xl">{t.programsTitle}</h2>
@@ -176,7 +176,7 @@ export default async function HomePage() {
 
       {/* Current opportunities */}
       {forms.length > 0 && (
-        <section className="container-site section-y">
+        <section className="container-site pb-[clamp(4rem,8vw,9rem)]">
           <Reveal className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="max-w-2xl">
               <h2 className="font-display text-3xl font-bold md:text-5xl">{t.opportunitiesTitle}</h2>

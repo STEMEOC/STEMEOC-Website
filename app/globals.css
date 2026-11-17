@@ -132,6 +132,18 @@ html:lang(km) :is(.leading-none, .leading-tight, .leading-snug, .leading-\[1\.05
 }
 
 /* Mirror of tab-slant-bottom, for a block flush with the right edge. */
+/* Panel pulled up behind its tab strip: fills the slanted notch, rest shows the hero. */
+@utility tab-notch {
+  clip-path: polygon(
+    0 0,
+    calc(var(--notch-w) - var(--slant)) 0,
+    var(--notch-w) var(--notch-h),
+    100% var(--notch-h),
+    100% 100%,
+    0 100%
+  );
+}
+
 @utility tab-slant-bottom-left {
   clip-path: polygon(0 0, 100% 0, 100% 100%, var(--slant, 5rem) 100%);
 }

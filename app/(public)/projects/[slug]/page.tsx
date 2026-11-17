@@ -43,7 +43,10 @@ export async function generateMetadata({ params }: PageProps<"/projects/[slug]">
   const [program, { dict }] = await Promise.all([getProgramBySlug(slug), getDictionary()]);
   if (!program) return { title: dict.projects.metaTitle };
   const page = PROGRAM_PAGES[slug];
-  return { title: page?.heroTitle ?? program.title, description: page?.summary ?? summarize(program.description, 160) };
+  return {
+    title: page?.heroTitle ?? program.title,
+    description: page?.summary ?? summarize(program.description, 160),
+  };
 }
 
 // Layout follows the "CRO landing page" frame in Figma. Program-specific
@@ -67,13 +70,7 @@ export default async function ProgramPage({ params }: PageProps<"/projects/[slug
     <section className="container-site grid items-center gap-10 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 lg:py-24">
       <Reveal className="relative aspect-[672/686] overflow-hidden rounded-[1.875rem] bg-placeholder">
         {overviewImage && (
-          <Image
-            src={overviewImage}
-            alt=""
-            fill
-            sizes="(max-width: 1024px) 100vw, 560px"
-            className="object-cover"
-          />
+          <Image src={overviewImage} alt="" fill sizes="(max-width: 1024px) 100vw, 560px" className="object-cover" />
         )}
       </Reveal>
       <Reveal delay={0.1}>
@@ -105,7 +102,9 @@ export default async function ProgramPage({ params }: PageProps<"/projects/[slug
         {photos.map((photo, i) => (
           <li key={photo.src}>
             <Reveal scroll={(i % 3) * 0.16}>
-              <div className={`group relative aspect-[4/3] overflow-hidden rounded-2xl ${photo.contain ? "bg-paper" : "bg-placeholder"}`}>
+              <div
+                className={`group relative aspect-[4/3] overflow-hidden rounded-2xl ${photo.contain ? "bg-paper" : "bg-placeholder"}`}
+              >
                 <Image
                   src={photo.src}
                   alt={photo.alt}
@@ -134,48 +133,52 @@ export default async function ProgramPage({ params }: PageProps<"/projects/[slug
   if (LANDING_SLUGS.has(slug) && page) {
     return (
       <PageTransition>
-        <ProgramLanding
-          program={program}
-          page={page}
-          logo={logo}
-          others={others}
-          gallery={gallery}
-          dict={dict}
-        />
+        <ProgramLanding program={program} page={page} logo={logo} others={others} gallery={gallery} dict={dict} />
       </PageTransition>
     );
   }
 
   return (
     <PageTransition>
-      {/* Hero */}
-      <section className="-mt-(--header-h) bg-navy pt-(--header-h) text-white">
-        <div className="container-site grid items-center gap-10 pb-12 pt-14 md:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:pb-16 lg:pt-24">
-          <Reveal>
-            <h1 className="max-w-2xl font-display text-3xl font-bold uppercase leading-tight md:text-5xl xl:text-6xl">
-              {title}
-            </h1>
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/90 md:text-lg">{summary}</p>
-          </Reveal>
-          {logo && (
-            <Reveal delay={0.15} className="flex justify-center lg:justify-end">
-              <Image
-                src={logo}
-                alt={program.title}
-                width={900}
-                height={400}
-                priority
-                className={`h-auto max-h-64 w-full max-w-md object-contain ${
-                  programLogoIsMonochrome(program) ? "brightness-0 invert" : ""
-                }`}
-              />
-            </Reveal>
-          )}
-        </div>
-      </section>
-
       <AboutTabs
         side="right"
+        backdrop={
+          page?.heroPhoto && (
+            <>
+              <Image src={page.heroPhoto} alt="" fill priority sizes="100vw" className="object-cover" />
+              {/* scrim */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,rgb(5_19_59/0.92),rgb(5_19_59/0.8)_55%,rgb(5_19_59/0.65))]" />
+            </>
+          )
+        }
+        hero={
+          <section
+            className={`relative -mt-(--header-h) pt-(--header-h) text-white ${page?.heroPhoto ? "" : "bg-navy"}`}
+          >
+            <div className="container-site relative grid items-center gap-10 pb-12 pt-14 md:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:pb-16 lg:pt-24">
+              <Reveal>
+                <h1 className="max-w-2xl font-display text-3xl font-bold uppercase leading-tight md:text-5xl xl:text-6xl">
+                  {title}
+                </h1>
+                <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/90 md:text-lg">{summary}</p>
+              </Reveal>
+              {logo && (
+                <Reveal delay={0.15} className="flex justify-center lg:justify-end">
+                  <Image
+                    src={logo}
+                    alt={program.title}
+                    width={900}
+                    height={400}
+                    priority
+                    className={`h-auto max-h-64 w-full max-w-md object-contain ${
+                      programLogoIsMonochrome(program) ? "brightness-0 invert" : ""
+                    }`}
+                  />
+                </Reveal>
+              )}
+            </div>
+          </section>
+        }
         actions={
           <>
             {page?.preRegisterUrl && (
@@ -219,7 +222,10 @@ export default async function ProgramPage({ params }: PageProps<"/projects/[slug
       <MoreProjects
         title={t.moreProjects}
         detailLabel={dict.home.landing.detail}
-        labels={{ prev: dict.home.landing.prevPrograms, next: dict.home.landing.nextPrograms }}
+        labels={{
+          prev: dict.home.landing.prevPrograms,
+          next: dict.home.landing.nextPrograms,
+        }}
         programs={others}
       />
     </PageTransition>

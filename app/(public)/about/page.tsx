@@ -78,7 +78,7 @@ export default async function AboutPage() {
 
       {/* Our Story, on a white tab rising out of the hero */}
       <section className="relative">
-        <div className="absolute bottom-full left-0 h-10 w-[85%] bg-white tab-slant-top [--slant:3rem] md:h-14 md:w-[55%] md:[--slant:5rem]" />
+        <div className="absolute bottom-full left-0 h-10 translate-y-px w-[85%] bg-white tab-slant-top [--slant:3rem] md:h-14 md:w-[55%] md:[--slant:5rem]" />
         <div className="container-site py-12 md:py-16">
           <Reveal className="max-w-2xl">
             <h2 className="font-display text-3xl font-bold md:text-5xl">{a.story.title}</h2>
