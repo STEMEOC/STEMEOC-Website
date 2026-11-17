@@ -8,7 +8,7 @@ const STAT_COLORS = ["bg-red", "bg-green", "bg-orange", "bg-blue"];
 export function StatBoxes({ stats, className = "" }: { stats: Stat[]; className?: string }) {
   if (stats.length === 0) return null;
   return (
-    <dl className={`grid auto-cols-[minmax(8rem,1fr)] grid-flow-col gap-3 overflow-x-auto md:gap-4 ${className}`}>
+    <dl className={`grid grid-cols-2 gap-3 sm:auto-cols-fr sm:grid-flow-col sm:grid-cols-none md:gap-4 ${className}`}>
       {stats.map((stat, i) => (
         <div
           key={stat.label}

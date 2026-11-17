@@ -12,6 +12,7 @@ import { Magnetic } from "@/components/interactive/Magnetic";
 import { PartnerLogos } from "@/components/PartnerLogos";
 import { TeamCard } from "@/components/TeamCard";
 import { ScrollRow } from "@/components/ScrollRow";
+import { HeroSlideshow } from "@/components/HeroSlideshow";
 import { Timeline } from "@/components/Timeline";
 import { QuestionsBand } from "@/components/QuestionsBand";
 
@@ -36,9 +37,19 @@ export default async function AboutPage() {
   return (
     <PageTransition>
       {/* Hero */}
-      <section className="-mt-(--header-h) bg-paper pt-(--header-h) text-navy">
-        <div className="container-site grid items-center gap-12 py-12 md:py-16 lg:grid-cols-[1.15fr_1fr] lg:gap-24 lg:pb-24 xl:gap-32">
-          <Reveal>
+      <section className="relative -mt-(--header-h) overflow-hidden bg-navy pt-(--header-h) text-white">
+        <HeroSlideshow
+          images={[
+            "/uploads/about/about-hero-v4.webp",
+            "/uploads/about/team-1458.webp",
+            "/uploads/about/team-1300-v2.webp",
+            "/uploads/STEM-Group.jpg",
+          ]}
+        />
+        {/* scrim */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_left,rgb(5_19_59/0.85),rgb(5_19_59/0.55)_50%,rgb(5_19_59/0.2))]" />
+        <div className="container-site relative flex min-h-[min(80svh,52rem)] items-center py-16 md:py-20 lg:justify-end lg:pb-28">
+          <Reveal className="max-w-2xl">
             <h1 className="font-display text-4xl font-bold md:text-6xl">{a.hero.title}</h1>
             <p className="mt-5 max-w-2xl text-base leading-relaxed md:text-lg md:text-justify">{a.hero.body}</p>
 
@@ -60,19 +71,6 @@ export default async function AboutPage() {
                   {t.getInvolved}
                 </Link>
               </Magnetic>
-            </div>
-          </Reveal>
-
-          {/* Photo collage */}
-          <Reveal delay={0.15} className="relative mx-auto aspect-[670/780] w-full max-w-xl">
-            <div className="absolute left-[1.5%] top-0 h-[34%] w-[64.6%] overflow-hidden rounded-2xl shadow-lg">
-              <Image src="/uploads/about/collage-2.webp" alt="Students presenting a project at the STEM Festival" fill priority className="object-cover" sizes="(max-width: 1024px) 60vw, 380px" />
-            </div>
-            <div className="absolute right-0 top-[13.3%] h-[76.7%] w-[67.6%] overflow-hidden rounded-2xl shadow-lg">
-              <Image src="/uploads/about/collage-3.webp" alt="Visitors at the STEM Festival exhibition" fill priority className="object-cover" sizes="(max-width: 1024px) 65vw, 400px" />
-            </div>
-            <div className="absolute bottom-0 left-0 h-[36.5%] w-[67.6%] overflow-hidden rounded-2xl shadow-lg">
-              <Image src="/uploads/about/collage-4.webp" alt="Participants of the Cambodia Robotics Olympiad 2024 on stage" fill className="object-cover" sizes="(max-width: 1024px) 65vw, 400px" />
             </div>
           </Reveal>
         </div>

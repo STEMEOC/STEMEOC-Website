@@ -27,10 +27,10 @@ export function ScrollRow({
       <ul ref={list} className={`flex snap-x snap-mandatory overflow-x-auto pb-6 scrollbar-rail ${className}`}>
         {children}
       </ul>
-      {/* arrows on the row's left and right edges */}
+      {/* arrows on the row's edges, outside the cards on lg */}
       {[
-        { dir: -1, label: labels.prev, Icon: CaretLeft, side: "left-0 -translate-x-1/2" },
-        { dir: 1, label: labels.next, Icon: CaretRight, side: "right-0 translate-x-1/2" },
+        { dir: -1, label: labels.prev, Icon: CaretLeft, side: "left-0 -translate-x-1/2 lg:left-auto lg:right-full lg:mr-4 lg:translate-x-0" },
+        { dir: 1, label: labels.next, Icon: CaretRight, side: "right-0 translate-x-1/2 lg:right-auto lg:left-full lg:ml-4 lg:translate-x-0" },
       ].map(({ dir, label, Icon, side }) => (
           <button
             key={dir}

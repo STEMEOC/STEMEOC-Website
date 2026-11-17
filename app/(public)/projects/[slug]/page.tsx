@@ -10,7 +10,7 @@ import { PageTransition } from "@/components/motion/PageTransition";
 import { Reveal } from "@/components/motion/Reveal";
 import { StatCounter } from "@/components/motion/StatCounter";
 import { AboutTabs } from "@/components/AboutTabs";
-import { ProjectsBand } from "@/components/ProjectsBand";
+import { MoreProjects } from "@/components/MoreProjects";
 import { ProgramCategories, externalProps } from "@/components/ProgramCategories";
 import { EventCards } from "@/components/EventCards";
 import { ProgramLanding } from "@/components/ProgramLanding";
@@ -216,9 +216,12 @@ export default async function ProgramPage({ params }: PageProps<"/projects/[slug
         />
       )}
 
-      <div className={page && page.sections.length > 0 ? "pt-8" : "pt-4"}>
-        <ProjectsBand title={t.moreProjects} detailLabel={dict.home.landing.detail} programs={others} />
-      </div>
+      <MoreProjects
+        title={t.moreProjects}
+        detailLabel={dict.home.landing.detail}
+        labels={{ prev: dict.home.landing.prevPrograms, next: dict.home.landing.nextPrograms }}
+        programs={others}
+      />
     </PageTransition>
   );
 }

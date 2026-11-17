@@ -148,14 +148,14 @@ export function ProgramLanding({
       )}
 
       {events.some((e) => e.video) && (
-        <section className="bg-white py-16 md:py-24">
+        <section className={`bg-navy py-16 text-white md:py-24 ${page.sections.some((section) => section.categories.length > 0) ? "mt-16 md:mt-24" : ""}`}>
           <div className="container-site">
             <Reveal className="mb-10 text-center md:mb-14">
-              <p className="text-sm font-semibold text-red md:text-base">{f.watch}</p>
+              <p className="text-sm font-semibold text-orange md:text-base">{f.watch}</p>
               <h2 className="mt-1 font-display text-3xl font-bold md:text-4xl">{f.highlight}</h2>
             </Reveal>
             <HighlightReel
-              items={events.filter((e) => e.video).slice(0, 4).map((e) => ({ year: e.year, title: e.title, image: e.image, video: e.video }))}
+              items={events.filter((e) => e.video).slice(0, 4).map((e) => ({ year: e.year, title: e.title, image: (e.imageContain && e.photos?.find((p) => !p.contain)?.src) || e.image, video: e.video }))}
             />
           </div>
         </section>

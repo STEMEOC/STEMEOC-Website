@@ -77,6 +77,8 @@ export type ProgramEvent = {
   image?: string;
   /** The image is a poster or logo: show all of it rather than crop. */
   imageContain?: boolean;
+  /** Header background photo, high-res 16:9. */
+  hero?: string;
   photos?: Photo[];
   /** YouTube ID for the edition's highlight video. */
   video?: string;
@@ -86,6 +88,8 @@ export type ProgramEvent = {
   participation?: { category: string; count: number }[];
   /** What the participation counts are. */
   participationUnit?: "people" | "teams";
+  /** This edition's own sponsors and partners, grouped by tier. */
+  sponsors?: { tier: string; items: { name: string; logo?: string }[] }[];
   /** Show the program's competition categories (with Register buttons). */
   showCategories?: boolean;
   winners?: Winners;
@@ -215,6 +219,12 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
     events: [
       {
         slug: "2026",
+        hero: "/uploads/events/cro-2026/hero.webp",
+        // sponsors (shared drive)
+        sponsors: [
+          { tier: "Venue Sponsor", items: [{ name: "AEON Mall", logo: "/uploads/partners/AEON-Mall.jpg" }] },
+          { tier: "Partners", items: [{ name: "Paragon International School", logo: "/uploads/partners/home/paragon.webp" }, { name: "WESTEAM", logo: "/uploads/partners/sponsors/westeam.webp" }, { name: "AI Farm", logo: "/uploads/partners/sponsors/ai-farm.webp" }, { name: "Bright Consultant Education & Travel", logo: "/uploads/partners/sponsors/bright.webp" }] },
+        ],
         year: "2026",
         video: "whgAwFyZ8js",
         date: "5 September 2026",
@@ -476,6 +486,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       },
       {
         slug: "2024",
+        hero: "/uploads/events/cro-2024/hero.webp",
         year: "2024",
         video: "Ouj-iHiXBrQ",
         date: "14 September 2024",
@@ -661,6 +672,15 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
     events: [
       {
         slug: "2026",
+        hero: "/uploads/events/festival-2026/hero.webp",
+        // sponsors (shared drive)
+        sponsors: [
+          { tier: "Supported by", items: [{ name: "Ministry of Education, Youth and Sport", logo: "/uploads/partners/home/moeys.webp" }, { name: "Ministry of Environment", logo: "/uploads/partners/home/moe.webp" }, { name: "Ministry of Industry, Science, Technology & Innovation", logo: "/uploads/partners/home/misti.webp" }, { name: "Phnom Penh Teacher Education College", logo: "/uploads/partners/PTC.png" }] },
+          { tier: "Platinum Sponsor", items: [{ name: "Thanks Carbon", logo: "/uploads/partners/sponsors/thanks-carbon.webp" }] },
+          { tier: "Silver Sponsor", items: [{ name: "Green Carbon", logo: "/uploads/partners/sponsors/green-carbon.webp" }] },
+          { tier: "Partners", items: [{ name: "Paragon International University", logo: "/uploads/partners/sponsors/paragon-iu.webp" }, { name: "American University of Phnom Penh", logo: "/uploads/partners/home/aupp.webp" }, { name: "MYTEB", logo: "/uploads/partners/sponsors/myteb.webp" }, { name: "Tunsai", logo: "/uploads/partners/sponsors/tunsai.webp" }, { name: "WESTEAM", logo: "/uploads/partners/sponsors/westeam.webp" }, { name: "Sisters of Code", logo: "/uploads/partners/sponsors/sisters-of-code.webp" }, { name: "SIPAR", logo: "/uploads/partners/sponsors/sipar.webp" }, { name: "Mind Books", logo: "/uploads/partners/sponsors/mind-books.webp" }, { name: "Bright Consultant Education & Travel", logo: "/uploads/partners/sponsors/bright.webp" }] },
+          { tier: "F&B Vendors", items: [{ name: "Krong Cafe", logo: "/uploads/partners/sponsors/krong-cafe.webp" }, { name: "Eagle Specialty Coffee", logo: "/uploads/partners/sponsors/eagle-coffee.webp" }, { name: "Heeretea", logo: "/uploads/partners/sponsors/heeretea.webp" }, { name: "KaoCup", logo: "/uploads/partners/sponsors/kaocup.webp" }, { name: "Slerk Krey", logo: "/uploads/partners/sponsors/slerk-krey.webp" }] },
+        ],
         year: "2026",
         video: "NKvKym71_o0",
         date: "7 February 2026",
@@ -697,8 +717,10 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
           { category: "Volunteers & team", count: 130 },
           { category: "Online registrations", count: 100 },
         ],
-        image: "/uploads/events/festival-2026/01.jpg",
+        image: "/uploads/unnamed-scaled.png",
+        imageContain: true,
         photos: [
+          { src: "/uploads/events/festival-2026/01.jpg", alt: "Guests on stage at the opening of the STEM Festival 2026" },
           { src: "/uploads/events/festival-2026/02.jpg", alt: "Students with their tessellation artwork at the STEM Festival 2026" },
           { src: "/uploads/events/festival-2026/03.jpg", alt: "A speaker at the opening of the STEM Festival 2026" },
           { src: "/uploads/events/festival-2026/04.jpg", alt: "A student speaker at the STEM Festival 2026" },
@@ -710,6 +732,14 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       },
       {
         slug: "2025",
+        // sponsors (shared drive)
+        sponsors: [
+          { tier: "Supported by", items: [{ name: "Ministry of Environment", logo: "/uploads/partners/home/moe.webp" }, { name: "Ministry of Education, Youth and Sport", logo: "/uploads/partners/home/moeys.webp" }, { name: "Ministry of Industry, Science, Technology & Innovation", logo: "/uploads/partners/home/misti.webp" }, { name: "Ministry of Land Management, Urban Planning and Construction", logo: "/uploads/partners/sponsors/mlupc.webp" }] },
+          { tier: "Diamond Sponsor", items: [{ name: "British Embassy Phnom Penh", logo: "/uploads/partners/British-Embassy.png" }] },
+          { tier: "Platinum Sponsor", items: [{ name: "Ministry of Environment", logo: "/uploads/partners/home/moe.webp" }] },
+          { tier: "Gold Sponsor", items: [{ name: "Smart Axiata", logo: "/uploads/partners/sponsors/smart.webp" }] },
+          { tier: "Partners", items: [{ name: "Paragon Education", logo: "/uploads/partners/home/paragon.webp" }, { name: "KILAT Events", logo: "/uploads/partners/sponsors/kilat.webp" }, { name: "MYTEB", logo: "/uploads/partners/sponsors/myteb.webp" }, { name: "SparkX Academy", logo: "/uploads/partners/sponsors/sparkx.webp" }, { name: "SnoopEdu", logo: "/uploads/partners/sponsors/snoopedu.webp" }, { name: "SIPAR", logo: "/uploads/partners/sponsors/sipar.webp" }, { name: "AUPP Leager Academy", logo: "/uploads/partners/home/aupp.webp" }, { name: "V-Media", logo: "/uploads/partners/sponsors/v-media.webp" }, { name: "Bright Consultant Education & Travel", logo: "/uploads/partners/sponsors/bright.webp" }, { name: "CocoFarm" }] },
+        ],
         year: "2025",
         video: "0qBF2vCrlmA",
         date: "8 February 2025",
@@ -1080,6 +1110,7 @@ export const PROGRAM_PAGES: Record<string, ProgramPage> = {
       },
       {
         slug: "plastic-odyssey-2019",
+        hero: "/uploads/events/plastic-odyssey-2019/hero.webp",
         year: "2019",
         date: "September 2019",
         title: "Plastic Odyssey Tour 2019",

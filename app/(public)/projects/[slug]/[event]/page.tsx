@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ArrowLeft, CalendarBlank, DownloadSimple, MapPin } from "@phosphor-icons/react/dist/ssr";
 import { getProgramBySlug, getPrograms } from "@/lib/content";
 import { getDictionary } from "@/lib/i18n";
-import { PARTNERS, programLogo } from "@/lib/brand";
+import { programLogo } from "@/lib/brand";
 import { PROGRAM_PAGES, getProgramEvent } from "@/lib/program-pages";
 import { PageTransition } from "@/components/motion/PageTransition";
 import { Reveal } from "@/components/motion/Reveal";
@@ -15,9 +15,12 @@ import { ChampionTabs } from "@/components/ChampionTabs";
 import { PhotoStack } from "@/components/PhotoStack";
 import { PhotoScroller } from "@/components/PhotoScroller";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
-import { PartnerLogos } from "@/components/PartnerLogos";
+import { EventSponsors } from "@/components/EventSponsors";
 import { MoreProjects } from "@/components/MoreProjects";
 import { QuestionsBand } from "@/components/QuestionsBand";
+
+// participation bars, logo colors
+const BAR_COLORS = ["bg-red", "bg-green", "bg-orange", "bg-blue"];
 
 const ACCENTS = {
   blue: { bg: "bg-blue", text: "text-blue" },
@@ -54,36 +57,59 @@ export default async function ProgramEventPage({ params }: PageProps<"/projects/
     (p) => !p.contain && p.src !== event.image,
   );
   const stackPhotos = photos.slice(0, 3);
+  // hero images
+  const heroPhoto = event.hero ?? (event.image && !event.imageContain ? event.image : photos[0]?.src);
+  const heroCard = heroPhoto ? (event.imageContain ? event.image : undefined) : (event.image ?? logo);
   const maxCount = Math.max(...(event.participation ?? []).map((p) => p.count), 1);
+  const totalCount = Math.max((event.participation ?? []).reduce((sum, p) => sum + p.count, 0), 1);
 
   return (
     <PageTransition>
       {/* Hero */}
-      <section className="-mt-(--header-h) bg-paper pt-(--header-h) text-navy">
-        <div className="container-site grid items-center gap-10 pb-24 pt-10 md:pb-28 md:pt-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+      <section
+        className={`relative -mt-(--header-h) overflow-hidden pt-(--header-h) ${heroPhoto ? "bg-navy text-white" : "bg-paper text-navy"}`}
+      >
+        {heroPhoto && (
+          <>
+            <Image src={heroPhoto} alt="" fill priority sizes="100vw" className="object-cover" />
+            {/* scrim */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgb(5_19_59/0.88),rgb(5_19_59/0.6)_55%,rgb(5_19_59/0.35))]" />
+          </>
+        )}
+        <div
+          className={`container-site relative grid items-center gap-10 pb-24 pt-10 md:pb-28 md:pt-14 lg:gap-16 ${
+            heroCard ? "lg:grid-cols-[1.1fr_0.9fr]" : ""
+          } ${heroPhoto ? "min-h-[min(75svh,46rem)]" : ""}`}
+        >
           <Reveal>
             <Link
               href={`/projects/${slug}`}
-              className="group inline-flex items-center gap-2 text-sm font-semibold text-navy/70 transition-colors hover:text-navy"
+              className={`group inline-flex items-center gap-2 text-sm font-semibold transition-colors ${
+                heroPhoto ? "text-white/80 hover:text-white" : "text-navy/70 hover:text-navy"
+              }`}
             >
               <ArrowLeft size={16} weight="bold" className="transition-transform duration-300 group-hover:-translate-x-1" />
               {e.back}
             </Link>
             <h1 className="mt-6 max-w-2xl font-display text-3xl font-bold uppercase leading-tight md:text-5xl">{event.title}</h1>
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-navy/85 md:text-lg">{event.summary}</p>
+            <p className={`mt-6 max-w-2xl text-base leading-relaxed md:text-lg ${heroPhoto ? "text-white/90" : "text-navy/85"}`}>
+              {event.summary}
+            </p>
             {event.reportUrl && (
               <a
                 href={event.reportUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-8 inline-flex h-11 items-center gap-2 rounded-full bg-navy px-6 text-sm font-bold text-white press hover:-translate-y-0.5 hover:bg-blue"
+                className={`mt-8 inline-flex h-11 items-center gap-2 rounded-full px-6 text-sm font-bold press hover:-translate-y-0.5 ${
+                  heroPhoto ? "bg-white text-navy hover:bg-white/90" : "bg-navy text-white hover:bg-blue"
+                }`}
               >
                 <DownloadSimple size={18} weight="bold" />
                 {e.downloadReport}
               </a>
             )}
           </Reveal>
-          {(event.image ?? logo) && (
+          {heroCard && (
             <Reveal delay={0.15} className="flex justify-center lg:justify-end">
               <div
                 className={`relative w-full overflow-hidden rounded-2xl bg-white shadow-[0_24px_50px_-30px_rgb(5_19_59/0.5)] ${
@@ -91,7 +117,7 @@ export default async function ProgramEventPage({ params }: PageProps<"/projects/
                 }`}
               >
                 <Image
-                  src={event.image ?? logo!}
+                  src={heroCard}
                   alt=""
                   fill
                   priority
@@ -143,22 +169,26 @@ export default async function ProgramEventPage({ params }: PageProps<"/projects/
 
       {/* Participation */}
       {event.participation && event.participation.length > 0 && (
-        <section className="container-site pb-16 md:pb-24">
+        <section className="container-site grid gap-10 pb-16 md:pb-24 lg:grid-cols-[1fr_1.6fr] lg:gap-20">
           <Reveal>
             <p className={`text-sm font-semibold md:text-base ${accent.text}`}>{e.participation}</p>
             <h2 className="mt-2 font-display text-3xl font-bold md:text-4xl">{e.whoTookPart}</h2>
+            <p className="mt-8 font-display text-6xl font-extrabold tabular-nums md:text-7xl">{totalCount.toLocaleString("en-US")}</p>
             {event.participationUnit && (
-              <p className="mt-2 text-sm text-navy/70 md:text-base">{e.countUnits[event.participationUnit]}</p>
+              <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-navy/60">{e.countUnits[event.participationUnit]}</p>
             )}
           </Reveal>
-          <dl className="mt-10 max-w-4xl space-y-5">
+          <dl className="border-b border-navy/15">
             {event.participation.map((row, i) => (
-              <Reveal key={row.category} scroll={i * 0.06} className="grid grid-cols-[8rem_1fr_4rem] items-center gap-4 md:grid-cols-[14rem_1fr_4rem]">
-                <dt className="text-sm md:text-base">{row.category}</dt>
-                <dd className="h-3 overflow-hidden rounded-full bg-navy/10">
-                  <span className="block h-full rounded-full bg-navy" style={{ width: `${(row.count / maxCount) * 100}%` }} />
+              <Reveal key={row.category} scroll={i * 0.06} className="grid grid-cols-[1fr_auto] items-baseline gap-x-4 border-t border-navy/15 py-5">
+                <dt className="font-semibold md:text-lg">{row.category}</dt>
+                <dd className="flex items-baseline gap-3">
+                  <span className="text-sm tabular-nums text-navy/50">{Math.round((row.count / totalCount) * 100)}%</span>
+                  <span className="font-display text-2xl font-extrabold tabular-nums md:text-3xl">{row.count.toLocaleString("en-US")}</span>
                 </dd>
-                <dd className="text-right font-bold tabular-nums">{row.count.toLocaleString("en-US")}</dd>
+                <div aria-hidden className="col-span-2 mt-3 h-2 bg-navy/[0.06]">
+                  <span className={`block h-full ${BAR_COLORS[i % BAR_COLORS.length]}`} style={{ width: `${(row.count / maxCount) * 100}%` }} />
+                </div>
               </Reveal>
             ))}
           </dl>
@@ -227,12 +257,14 @@ export default async function ProgramEventPage({ params }: PageProps<"/projects/
       )}
 
       {/* Partners */}
-      <section className="container-site pb-16 md:pb-24">
-        <Reveal>
-          <h2 className="mb-10 text-center text-base font-semibold text-navy/70 md:mb-12 md:text-lg">{e.thanks}</h2>
-          <PartnerLogos partners={PARTNERS} />
-        </Reveal>
-      </section>
+      {event.sponsors && event.sponsors.length > 0 && (
+        <section className="container-site pb-16 md:pb-24">
+          <Reveal>
+            <h2 className="mx-auto mb-12 max-w-2xl text-center font-display text-3xl font-bold md:mb-16 md:text-4xl">{e.thanks}</h2>
+            <EventSponsors groups={event.sponsors} />
+          </Reveal>
+        </section>
+      )}
 
       <PastEvents programSlug={slug} events={others} title={t.festival.previousEvents} logo={logo} />
 

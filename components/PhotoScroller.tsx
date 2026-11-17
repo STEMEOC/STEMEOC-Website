@@ -22,10 +22,12 @@ export function PhotoScroller({ photos, vertical, labels }: { photos: Photo[]; v
 
   return (
     <>
+      {/* photo column */}
+      <div className={vertical ? "relative" : undefined}>
       <ul
         className={
           vertical
-            ? "flex snap-y snap-mandatory gap-4 overflow-x-auto scrollbar-rail max-lg:pb-4 lg:max-h-[min(34rem,70vh)] lg:flex-col lg:overflow-y-auto lg:pr-3"
+            ? "flex snap-y snap-mandatory gap-4 overflow-x-auto scrollbar-rail max-lg:pb-4 lg:absolute lg:inset-x-0 lg:top-0 lg:bottom-10 lg:flex-col lg:overflow-y-auto lg:pr-3"
             : "grid grid-cols-2 gap-4 sm:grid-cols-3"
         }
       >
@@ -48,6 +50,7 @@ export function PhotoScroller({ photos, vertical, labels }: { photos: Photo[]; v
           </li>
         ))}
       </ul>
+      </div>
 
       {/* full-size viewer */}
       <dialog

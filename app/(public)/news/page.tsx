@@ -9,6 +9,8 @@ import { PageTransition } from "@/components/motion/PageTransition";
 import { Reveal } from "@/components/motion/Reveal";
 
 const VIDEOS = 4;
+// hidden until we have news/interview clips
+const SHOW_VIDEOS = false;
 
 export async function generateMetadata(): Promise<Metadata> {
   const { dict } = await getDictionary();
@@ -62,7 +64,7 @@ export default async function NewsPage({ searchParams }: PageProps<"/news">) {
         )}
       </section>
 
-      {videos.length > 0 && (
+      {SHOW_VIDEOS && videos.length > 0 && (
         <section className="container-site pb-24 md:pb-32">
           <Reveal className="mb-10">
             <p className="text-sm font-semibold text-red md:text-base">{dict.news.watch}</p>

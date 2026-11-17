@@ -136,10 +136,7 @@ html:lang(km) :is(.leading-none, .leading-tight, .leading-snug, .leading-\[1\.05
   clip-path: polygon(0 0, 100% 0, 100% 100%, var(--slant, 5rem) 100%);
 }
 
-/* Slim pill scrollbar for sideways rails on navy: no arrow buttons, a faint
-   track inset to the container gutter so it lines up with the cards, and a
-   thumb that brightens on hover. Chrome ignores ::-webkit-scrollbar once
-   scrollbar-color is set, so the standard properties are Firefox-only. */
+/* rail scrollbar, tinted from text color */
 @utility scrollbar-rail {
   &::-webkit-scrollbar {
     height: 6px;
@@ -150,18 +147,18 @@ html:lang(km) :is(.leading-none, .leading-tight, .leading-snug, .leading-\[1\.05
   &::-webkit-scrollbar-track {
     margin-inline: var(--gutter, 0);
     border-radius: 9999px;
-    background: rgb(255 255 255 / 0.1);
+    background: color-mix(in srgb, currentColor 12%, transparent);
   }
   &::-webkit-scrollbar-thumb {
     border-radius: 9999px;
-    background: rgb(255 255 255 / 0.45);
+    background: color-mix(in srgb, currentColor 45%, transparent);
   }
   &::-webkit-scrollbar-thumb:hover {
-    background: rgb(255 255 255 / 0.75);
+    background: color-mix(in srgb, currentColor 75%, transparent);
   }
   @supports not selector(::-webkit-scrollbar) {
     scrollbar-width: thin;
-    scrollbar-color: rgb(255 255 255 / 0.45) rgb(255 255 255 / 0.1);
+    scrollbar-color: color-mix(in srgb, currentColor 45%, transparent) color-mix(in srgb, currentColor 12%, transparent);
   }
 }
 

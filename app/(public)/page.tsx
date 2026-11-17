@@ -80,17 +80,17 @@ export default async function HomePage() {
               id: "story",
               label: t.tabs.story,
               content: (
-                <section className="grid bg-navy text-white [--gutter:clamp(1.25rem,13vw_-_3.1rem,12.5rem)] lg:grid-cols-2">
-                  <div className="relative min-h-[22rem] lg:min-h-[min(48vw,52rem)]">
-                    <Image
-                      src="/uploads/STEM-Group.jpg"
-                      alt={t.storyTitleLine1 + " " + t.storyTitleLine2}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                    />
-                  </div>
-                  <Reveal className="self-center px-(--gutter) py-16 lg:py-24 lg:pl-16 xl:pl-24">
+                <section className="relative grid min-h-[36rem] bg-navy text-white [--gutter:clamp(1.25rem,13vw_-_3.1rem,12.5rem)] lg:min-h-[min(48vw,52rem)] lg:grid-cols-2">
+                  <Image
+                    src="/uploads/STEM-Group.jpg"
+                    alt={t.storyTitleLine1 + " " + t.storyTitleLine2}
+                    fill
+                    className="object-cover object-bottom"
+                    sizes="100vw"
+                  />
+                  {/* scrim */}
+                  <div className="absolute inset-0 bg-[linear-gradient(to_left,rgb(5_19_59/0.85),rgb(5_19_59/0.55)_55%,rgb(5_19_59/0.2))]" />
+                  <Reveal className="relative self-center px-(--gutter) py-16 lg:col-start-2 lg:py-24 lg:pl-16 xl:pl-24">
                     <h2 className="font-display text-3xl font-bold md:text-5xl">
                       {t.storyTitleLine1}{" "}
                       <span className="inline-block bg-blue px-2">{t.storyTitleLine2}</span>
@@ -128,7 +128,7 @@ export default async function HomePage() {
       {/* Stats */}
       {stats.length > 0 && (
         <section className="container-site section-y">
-          <dl className="grid auto-cols-[minmax(10rem,1fr)] grid-flow-col gap-4 overflow-x-auto md:gap-8">
+          <dl className="grid grid-cols-2 gap-4 md:gap-8 lg:grid-cols-4">
             {stats.map((stat, i) => (
               <Reveal
                 key={stat.id}

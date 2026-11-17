@@ -39,8 +39,8 @@ export function HighlightReel({ items }: { items: Item[] }) {
               onClick={() => setActive(i)}
               aria-pressed={i === active}
               aria-label={it.title}
-              className={`group relative block aspect-video w-full overflow-hidden rounded-xl bg-placeholder press ring-offset-2 transition-[box-shadow] ${
-                i === active ? "ring-3 ring-blue" : "hover:ring-2 hover:ring-navy/30"
+              className={`group relative block aspect-video w-full overflow-hidden rounded-xl bg-placeholder press ring-offset-2 ring-offset-navy transition-[box-shadow] ${
+                i === active ? "ring-3 ring-blue" : "hover:ring-2 hover:ring-white/40"
               }`}
             >
               {it.image && (
