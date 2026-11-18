@@ -67,8 +67,8 @@ export default async function ProgramPage({ params }: PageProps<"/projects/[slug
   const others = programs.filter((p) => p.id !== program.id);
 
   const overview = (
-    <section className="container-site grid items-center gap-10 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 lg:py-24">
-      <Reveal className="relative aspect-[672/686] overflow-hidden rounded-[1.875rem] bg-placeholder">
+    <section className="container-site grid items-center gap-10 py-16 lg:grid-cols-[0.6fr_1.4fr] lg:gap-16 lg:py-24">
+      <Reveal className="relative aspect-[4/5] overflow-hidden rounded-[1.875rem] bg-placeholder">
         {overviewImage && (
           <Image src={overviewImage} alt="" fill sizes="(max-width: 1024px) 100vw, 560px" className="object-cover" />
         )}

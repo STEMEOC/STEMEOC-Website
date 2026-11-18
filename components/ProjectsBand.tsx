@@ -24,7 +24,7 @@ export function ProjectsBand({
   return (
     <section>
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 w-[85%] bg-navy tab-slant-top [--slant:4rem] md:w-[45%] md:[--slant:7rem]" />
+        <div className="absolute top-0 -bottom-px left-0 w-[85%] bg-navy tab-slant-top [--slant:4rem] md:w-[45%] md:[--slant:7rem]" />
         <h2 className="container-site relative py-6 font-display text-3xl font-bold uppercase text-white md:py-7 md:text-4xl">
           {title}
         </h2>

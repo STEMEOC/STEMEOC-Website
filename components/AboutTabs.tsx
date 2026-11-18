@@ -143,7 +143,7 @@ export function AboutTabs({
           <div className="relative">
             {backdrop ? (
               // shortcut: white cut-out only fits side="right", add a mirror if a left one needs a photo
-              <div className="absolute inset-y-0 left-0 hidden w-[calc(55%+6rem)] bg-white tab-slant-top [--slant:6rem] lg:block" />
+              <div className="absolute top-0 -bottom-px left-0 hidden w-[calc(55%+6rem)] bg-white tab-slant-top [--slant:6rem] lg:block" />
             ) : (
               // navy tab, flush with the page edge
               <div
